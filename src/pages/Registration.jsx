@@ -16,18 +16,14 @@ export default function EmployeeRegistration() {
 
   const roles = [
     "Admin",
-    "Operations Staff",
-    "Clearance Staff",
-    "Documentation Staff",
-    "Manager",
+    "Accountant",
+    "Clearance officer"
   ];
 
   const departments = [
-    "Operations",
-    "Documentation",
-    "Finance",
-    "HR",
-    "Management",
+    "Administration",
+    "Accounts",
+    "Clearance",
   ];
 
   const handleChange = (e) => {
@@ -150,3 +146,4 @@ export default function EmployeeRegistration() {
     </div>
   );
 }
+
