@@ -1,0 +1,31 @@
+# Copy this file to server/.env
+
+# Server Configuration
+PORT=5001
+NODE_ENV=development
+
+# Database Configuration (CockroachDB Cloud)
+DATABASE_URL=postgresql://seaflow:ueI44Hvuu-BIfO2n5ZOWbQ@shipment-portal-18866.j77.aws-ap-southeast-1.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full
+DATABASE_SSL=true
+DATABASE_CA_CERT=/Users/ashwinn/.postgresql/root.crt
+
+# JWT Configuration
+JWT_SECRET=shipment-portal-jwt-secret-key-2024-production-change-this
+JWT_REFRESH_SECRET=shipment-portal-refresh-secret-key-2024-production-change-this
+JWT_EXPIRES_IN=15m
+JWT_REFRESH_EXPIRES_IN=7d
+
+# Email Configuration (SMTP) - Optional for now
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+EMAIL_FROM=noreply@shipmentportal.com
+
+# Frontend URL (for CORS and email links)
+FRONTEND_URL=http://localhost:5173
+
+# Rate Limiting
+MAX_LOGIN_ATTEMPTS=5
+LOCK_TIME=15
