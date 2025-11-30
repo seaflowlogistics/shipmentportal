@@ -4,6 +4,7 @@ import authRoutes from './routes/auth.routes';
 import usersRoutes from './routes/users.routes';
 import shipmentsRoutes from './routes/shipments.routes';
 import documentsRoutes from './routes/documents.routes';
+import auditRoutes from './routes/audit.routes';
 import { errorHandler, notFound } from './middleware/errorHandler';
 import { appConfig } from './config/auth';
 
@@ -27,6 +28,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/shipments', shipmentsRoutes);
 app.use('/api/documents', documentsRoutes);
+app.use('/api/audit-logs', auditRoutes);
 
 // Error handling
 app.use(notFound);

@@ -4,7 +4,10 @@ let transporter: any = null;
 try {
   const nodemailer = require('nodemailer');
   transporter = nodemailer.createTransporter(emailConfig.smtp);
-  console.log('✅ Email transporter initialized');
+  console.log(`✅ Email transporter initialized`);
+  console.log(`   Host: ${emailConfig.smtp.host}:${emailConfig.smtp.port}`);
+  console.log(`   From: ${emailConfig.fromName} <${emailConfig.from}>`);
+  console.log(`   TLS: ${emailConfig.smtp.secure ? 'TLS/SSL' : 'STARTTLS'}`);
 } catch (error) {
   console.warn('⚠️  Email functionality disabled - nodemailer not available');
 }
@@ -18,19 +21,19 @@ export interface EmailOptions {
 
 export const sendEmail = async (options: EmailOptions): Promise<void> => {
   if (!transporter) {
-    console.warn('⚠️  Email not sent - transporter not initialized');
+    console.warn('Email not sent - transporter not initialized');
     return;
   }
 
   try {
     await transporter.sendMail({
-      from: emailConfig.from,
+      from: `${emailConfig.fromName} <${emailConfig.from}>`,
       to: options.to,
       subject: options.subject,
       html: options.html,
       text: options.text,
     });
-    console.log(`✅ Email sent to ${options.to}`);
+    console.log(`✉️  Email sent to ${options.to} - Subject: ${options.subject}`);
   } catch (error) {
     console.error('❌ Error sending email:', error);
     throw new Error('Failed to send email');
@@ -71,7 +74,7 @@ export const sendWelcomeEmail = async (
             <p><strong>Temporary Password:</strong> ${temporaryPassword}</p>
           </div>
           
-          <p><strong>⚠️ Important:</strong> You will be required to change your password upon first login for security reasons.</p>
+          <p><strong>Important:</strong> You will be required to change your password upon first login for security reasons.</p>
           
           <a href="${appConfig.frontendUrl}/login" class="button">Login to Portal</a>
           
@@ -130,7 +133,7 @@ export const sendPasswordResetEmail = async (
           <p style="word-break: break-all; color: #4F46E5;">${resetUrl}</p>
           
           <div class="warning">
-            <p><strong>⚠️ Security Notice:</strong></p>
+            <p><strong>Security Notice:</strong></p>
             <ul>
               <li>This link will expire in 1 hour</li>
               <li>If you didn't request this, please ignore this email</li>

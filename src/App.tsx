@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { RoleBasedRoute } from './components/auth/RoleBasedRoute';
 import { Navigation } from './components/Navigation';
@@ -14,6 +14,9 @@ import { AccountsDashboard } from './pages/AccountsDashboard';
 import { ClearanceManagerDashboard } from './pages/ClearanceManagerDashboard';
 import { AdminUsersPage } from './pages/AdminUsersPage';
 import { AdminAuditLogsPage } from './pages/AdminAuditLogsPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
+import { ChangePasswordPage } from './pages/ChangePasswordPage';
 
 function AppContent() {
   return (
@@ -47,6 +50,9 @@ function AppContent() {
             </RoleBasedRoute>
           }
         />
+
+        {/* Password management routes */}
+        <Route path="/change-password" element={<ChangePasswordPage />} />
 
         {/* Shipment routes */}
         <Route path="/shipments" element={<ShipmentsListPage />} />
@@ -102,25 +108,25 @@ function AppContent() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Public routes */}
-        <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+    <Routes>
+      {/* Public authentication routes */}
+      <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
-        {/* All protected routes wrapped with AppContent - must come before specific dashboard routes */}
-        <Route
-          path="/*"
-          element={
-            <ProtectedRoute>
-              <AppContent />
-            </ProtectedRoute>
-          }
-        />
+      {/* All protected routes wrapped with AppContent - must come before specific dashboard routes */}
+      <Route
+        path="/*"
+        element={
+          <ProtectedRoute>
+            <AppContent />
+          </ProtectedRoute>
+        }
+      />
 
-        {/* Default redirect */}
-        <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
-      </Routes>
-    </BrowserRouter>
+      {/* Default redirect */}
+      <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
+    </Routes>
   );
 }
 

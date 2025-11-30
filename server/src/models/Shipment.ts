@@ -207,7 +207,12 @@ export class ShipmentModel {
             }
         }
 
-        if (fields.length === 0) {
+        // Always update updated_at timestamp (application-level for CockroachDB/PostgreSQL compatibility)
+        fields.push(`updated_at = $${paramCount++}`);
+        values.push(new Date());
+
+        if (fields.length === 1) {
+            // Only updated_at was set, nothing else to update
             return this.findById(id);
         }
 

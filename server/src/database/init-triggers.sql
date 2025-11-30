@@ -1,0 +1,11 @@
+-- Triggers are no longer used (deprecated)
+-- updated_at timestamps are now managed at the application layer
+-- This ensures compatibility with both CockroachDB and PostgreSQL
+--
+-- Previous implementation used database triggers, but this approach:
+-- 1. Caused CockroachDB compatibility issues with CREATE OR REPLACE FUNCTION
+-- 2. Made it harder to track who updated records
+-- 3. Added unnecessary database complexity
+--
+-- New approach: Application layer manages timestamps
+-- See: UserModel.update() and ShipmentModel.update() in src/models/

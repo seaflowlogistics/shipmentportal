@@ -3,7 +3,7 @@ import { AuthRequest } from '../middleware/auth.middleware';
 import { ShipmentModel, CreateShipmentData, UpdateShipmentData } from '../models/Shipment';
 import { DocumentModel } from '../models/Document';
 import { createAuditLog } from '../utils/auditLog';
-import { deleteUploadedFile, getStoragePath } from '../middleware/upload.middleware';
+import { deleteUploadedFile } from '../middleware/upload.middleware';
 
 // Create Shipment
 export const createShipment = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -102,7 +102,7 @@ export const createShipment = async (req: AuthRequest, res: Response): Promise<v
             pickup_date,
             expected_delivery_date,
             mode_of_transport,
-            created_by: req.user!.id
+            created_by: (req.user!.userId || req.user!.id)!
         };
 
         const shipment = await ShipmentModel.create(shipmentData);
@@ -164,7 +164,8 @@ export const updateShipment = async (req: AuthRequest, res: Response): Promise<v
         }
 
         // Only creator or admin can update
-        if (shipment.created_by !== req.user!.id && req.user!.role !== 'admin') {
+        const userId = req.user!.id || req.user!.userId;
+        if (shipment.created_by !== userId && req.user!.role !== 'admin') {
             res.status(403).json({ error: 'You do not have permission to update this shipment' });
             return;
         }
@@ -265,7 +266,7 @@ export const listShipments = async (req: AuthRequest, res: Response): Promise<vo
 
         // ClearanceManager and Accounts can only see their own shipments (except Admin)
         if (req.user!.role === 'clearance_manager') {
-            createdBy = req.user!.id;
+            createdBy = req.user!.id || req.user!.userId;
         }
 
         const filters = {
@@ -301,7 +302,7 @@ export const getStatistics = async (req: AuthRequest, res: Response): Promise<vo
 
         // ClearanceManager gets only their statistics
         if (req.user!.role === 'clearance_manager') {
-            userId = req.user!.id;
+            userId = req.user!.id || req.user!.userId;
         }
 
         const stats = await ShipmentModel.getStatistics(userId);
