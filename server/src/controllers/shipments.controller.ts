@@ -2,8 +2,11 @@ import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth.middleware';
 import { ShipmentModel, CreateShipmentData, UpdateShipmentData } from '../models/Shipment';
 import { DocumentModel } from '../models/Document';
+import { UserModel } from '../models/User';
 import { createAuditLog } from '../utils/auditLog';
 import { deleteUploadedFile } from '../middleware/upload.middleware';
+import { emailService } from '../services/email.service';
+import { validateShipmentDocuments } from '../utils/documentValidation';
 
 // Create Shipment
 export const createShipment = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -117,6 +120,21 @@ export const createShipment = async (req: AuthRequest, res: Response): Promise<v
             ipAddress: req.ip,
             userAgent: req.get('user-agent')
         });
+
+        // Send email notification to accounts managers
+        try {
+            const accountsManagers = await UserModel.findByRole('accounts');
+            const managerEmails = accountsManagers
+                .filter((user: any) => user.is_active && user.email) // Using 'any' as 'User' type is not defined in this snippet
+                .map((user: any) => user.email!); // Using 'any' as 'User' type is not defined in this snippet
+
+            if (managerEmails.length > 0) {
+                await emailService.sendNewShipmentNotification(shipment, managerEmails);
+            }
+        } catch (emailError) {
+            console.error('Failed to send new shipment notification:', emailError);
+            // Don't fail the request if email fails
+        }
 
         res.status(201).json({
             message: 'Shipment created successfully',
@@ -339,6 +357,17 @@ export const approveShipment = async (req: AuthRequest, res: Response): Promise<
             return;
         }
 
+        // Validate required documents are present
+        const validation = await validateShipmentDocuments(id, shipment.mode_of_transport);
+        if (!validation.isValid) {
+            res.status(400).json({
+                error: 'Cannot approve shipment: missing required documents',
+                details: validation.errors,
+                missingDocuments: validation.missingDocuments
+            });
+            return;
+        }
+
         const updated = await ShipmentModel.update(id, {
             status: 'approved',
             last_updated_by: req.user!.id
@@ -354,6 +383,16 @@ export const approveShipment = async (req: AuthRequest, res: Response): Promise<
             ipAddress: req.ip,
             userAgent: req.get('user-agent')
         });
+
+        // Send email notification to shipment creator
+        try {
+            const creator = await UserModel.findById(shipment.created_by!);
+            if (creator && creator.email) {
+                await emailService.sendApprovalNotification(updated, creator.email);
+            }
+        } catch (emailError) {
+            console.error('Failed to send approval notification:', emailError);
+        }
 
         res.json({
             message: 'Shipment approved successfully',
@@ -409,6 +448,16 @@ export const rejectShipment = async (req: AuthRequest, res: Response): Promise<v
             userAgent: req.get('user-agent')
         });
 
+        // Send email notification to shipment creator
+        try {
+            const creator = await UserModel.findById(shipment.created_by!);
+            if (creator && creator.email) {
+                await emailService.sendRejectionNotification(updated, creator.email, reason);
+            }
+        } catch (emailError) {
+            console.error('Failed to send rejection notification:', emailError);
+        }
+
         res.json({
             message: 'Shipment rejected successfully',
             shipment: updated
@@ -457,6 +506,16 @@ export const requestChanges = async (req: AuthRequest, res: Response): Promise<v
             ipAddress: req.ip,
             userAgent: req.get('user-agent')
         });
+
+        // Send email notification to shipment creator
+        try {
+            const creator = await UserModel.findById(shipment.created_by!);
+            if (creator && creator.email) {
+                await emailService.sendChangesRequestedNotification(updated, creator.email, message || 'Please review and update your shipment.');
+            }
+        } catch (emailError) {
+            console.error('Failed to send changes requested notification:', emailError);
+        }
 
         res.json({
             message: 'Change request sent successfully',
