@@ -19,9 +19,9 @@ const runMigration = async () => {
     const schemaPath = path.join(__dirname, '../database/schema.sql');
     const schema = fs.readFileSync(schemaPath, 'utf8');
 
-    console.log('🚀 Running migration...');
+    console.log('Running migration...');
     await client.query(schema);
-    console.log('✅ Migration completed successfully!');
+    console.log('Migration completed successfully!');
     
   } catch (error) {
     console.error('❌ Migration failed:', error);

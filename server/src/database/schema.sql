@@ -1,6 +1,19 @@
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Function to update updated_at timestamp
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
+DROP TRIGGER IF EXISTS update_shipments_updated_at ON shipments;
+DROP FUNCTION IF EXISTS update_updated_at_column();
+
+CREATE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -24,6 +37,12 @@ CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 CREATE INDEX IF NOT EXISTS idx_users_is_active ON users(is_active);
+
+-- Trigger to automatically update updated_at
+CREATE TRIGGER update_users_updated_at
+  BEFORE UPDATE ON users
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
 
 -- Audit logs table
 CREATE TABLE IF NOT EXISTS audit_logs (
@@ -70,20 +89,72 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_token ON refresh_tokens(token);
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_id ON refresh_tokens(user_id);
 
--- Function to update updated_at timestamp
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+-- Shipments table
+CREATE TABLE IF NOT EXISTS shipments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  shipment_id VARCHAR(50) UNIQUE NOT NULL,
+  exporter_name VARCHAR(255) NOT NULL,
+  exporter_address TEXT NOT NULL,
+  exporter_contact VARCHAR(255),
+  exporter_email VARCHAR(255),
+  vendor_name VARCHAR(255) NOT NULL,
+  vendor_address TEXT NOT NULL,
+  vendor_contact VARCHAR(255),
+  vendor_email VARCHAR(255),
+  receiver_name VARCHAR(255) NOT NULL,
+  receiver_address TEXT NOT NULL,
+  receiver_contact VARCHAR(255),
+  receiver_email VARCHAR(255),
+  item_description TEXT NOT NULL,
+  weight DECIMAL(12, 2) NOT NULL,
+  weight_unit VARCHAR(10) DEFAULT 'kg',
+  dimensions_length DECIMAL(10, 2),
+  dimensions_width DECIMAL(10, 2),
+  dimensions_height DECIMAL(10, 2),
+  dimensions_unit VARCHAR(10) DEFAULT 'cm',
+  value DECIMAL(15, 2) NOT NULL,
+  currency VARCHAR(3) DEFAULT 'USD',
+  pickup_date DATE NOT NULL,
+  expected_delivery_date DATE NOT NULL,
+  mode_of_transport VARCHAR(50) NOT NULL CHECK (mode_of_transport IN ('air', 'sea', 'road')),
+  status VARCHAR(50) NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'created', 'approved', 'rejected', 'changes_requested', 'in_transit', 'delivered', 'cancelled')),
+  rejection_reason TEXT,
+  created_by UUID REFERENCES users(id),
+  last_updated_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
 
--- Trigger to automatically update updated_at
-CREATE TRIGGER update_users_updated_at
-  BEFORE UPDATE ON users
+-- Indexes for shipments table
+CREATE INDEX IF NOT EXISTS idx_shipments_status ON shipments(status);
+CREATE INDEX IF NOT EXISTS idx_shipments_created_by ON shipments(created_by);
+CREATE INDEX IF NOT EXISTS idx_shipments_pickup_date ON shipments(pickup_date);
+CREATE INDEX IF NOT EXISTS idx_shipments_created_at ON shipments(created_at);
+CREATE INDEX IF NOT EXISTS idx_shipments_mode ON shipments(mode_of_transport);
+
+-- Trigger to automatically update shipments updated_at
+CREATE TRIGGER update_shipments_updated_at
+  BEFORE UPDATE ON shipments
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
+
+-- Documents table
+CREATE TABLE IF NOT EXISTS documents (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  shipment_id UUID NOT NULL REFERENCES shipments(id) ON DELETE CASCADE,
+  document_type VARCHAR(50) NOT NULL CHECK (document_type IN ('invoice', 'packing_list', 'bill_of_lading', 'air_waybill', 'other')),
+  file_name VARCHAR(255) NOT NULL,
+  file_path VARCHAR(500) NOT NULL,
+  file_size INTEGER NOT NULL,
+  file_type VARCHAR(50),
+  uploaded_by UUID REFERENCES users(id),
+  uploaded_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Indexes for documents table
+CREATE INDEX IF NOT EXISTS idx_documents_shipment_id ON documents(shipment_id);
+CREATE INDEX IF NOT EXISTS idx_documents_uploaded_by ON documents(uploaded_by);
+CREATE INDEX IF NOT EXISTS idx_documents_type ON documents(document_type);
 
 -- Insert default admin user (password: Admin@123)
 -- Password hash for 'Admin@123' using bcrypt
@@ -98,13 +169,3 @@ VALUES (
   true
 )
 ON CONFLICT (username) DO NOTHING;
-
--- Success message
-DO $$
-BEGIN
-  RAISE NOTICE 'Database schema created successfully!';
-  RAISE NOTICE 'Default admin user created:';
-  RAISE NOTICE '  Username: admin';
-  RAISE NOTICE '  Password: Admin@123';
-  RAISE NOTICE '  Please change the password after first login!';
-END $$;
