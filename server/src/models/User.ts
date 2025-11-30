@@ -188,6 +188,14 @@ export class UserModel {
         };
     }
 
+    static async findByRole(role: string): Promise<User[]> {
+        const result = await pool.query(
+            'SELECT * FROM users WHERE role = $1 AND is_active = true ORDER BY created_at DESC',
+            [role]
+        );
+        return result.rows;
+    }
+
     static async updatePassword(id: string, passwordHash: string): Promise<void> {
         await pool.query(
             'UPDATE users SET password_hash = $1, must_change_password = false WHERE id = $2',

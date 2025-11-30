@@ -4,7 +4,7 @@ import { UserModel } from '../models/User';
 import { RefreshTokenModel, PasswordResetTokenModel } from '../models/Token';
 import { comparePassword, hashPassword, validatePasswordStrength } from '../utils/password';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt';
-import { sendPasswordResetEmail } from '../utils/email';
+import { emailService } from '../services/email.service';
 import { createAuditLog } from '../utils/auditLog';
 import { authConfig } from '../config/auth';
 
@@ -184,9 +184,9 @@ export const forgotPassword = async (req: AuthRequest, res: Response): Promise<v
 
         const user = await UserModel.findByEmail(email);
 
-        // For MVP without email: return generic response for non-existent emails (prevent enumeration)
+        // Always return success to prevent email enumeration
         if (!user) {
-            res.json({ message: 'If the email exists, you can reset your password' });
+            res.json({ message: 'If the email exists, a password reset link has been sent' });
             return;
         }
 
@@ -197,8 +197,18 @@ export const forgotPassword = async (req: AuthRequest, res: Response): Promise<v
         const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
         const resetToken = await PasswordResetTokenModel.create(user.id, expiresAt);
 
-        // For MVP without email: return the token directly to the user
-        // In production with email, this token would be sent via email instead
+        // Send password reset email
+        try {
+            await emailService.sendPasswordResetEmail(
+                user.email,
+                resetToken.token,
+                user.full_name || user.username
+            );
+        } catch (emailError) {
+            console.error('Failed to send password reset email:', emailError);
+            // Don't reveal email sending failure to prevent enumeration
+        }
+
         await createAuditLog({
             userId: user.id,
             action: 'PASSWORD_RESET_REQUESTED',
@@ -207,8 +217,7 @@ export const forgotPassword = async (req: AuthRequest, res: Response): Promise<v
         });
 
         res.json({
-            message: 'Password reset token generated. Use this token to reset your password.',
-            token: resetToken.token
+            message: 'If the email exists, a password reset link has been sent'
         });
     } catch (error) {
         console.error('Forgot password error:', error);

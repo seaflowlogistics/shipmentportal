@@ -17,7 +17,8 @@ import {
   ToastContainer,
 } from '../components';
 import { useToast } from '../hooks/useToast';
-import { FunnelIcon } from '@heroicons/react/24/outline';
+import { FunnelIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { exportToExcel, exportToPDF, prepareAuditLogsForExport } from '../utils/export';
 
 interface AuditLog {
   id: string;
@@ -81,6 +82,16 @@ export const AdminAuditLogsPage: React.FC = () => {
       minute: '2-digit',
       second: '2-digit',
     });
+  };
+
+  const handleExportExcel = () => {
+    const exportData = prepareAuditLogsForExport(filteredLogs);
+    exportToExcel(exportData, `audit-logs-${new Date().toISOString().split('T')[0]}`, 'Audit Logs');
+  };
+
+  const handleExportPDF = () => {
+    const exportData = prepareAuditLogsForExport(filteredLogs);
+    exportToPDF(exportData, `audit-logs-${new Date().toISOString().split('T')[0]}`, 'Audit Logs');
   };
 
   const getActionBadgeVariant = (action: string) => {
@@ -157,10 +168,22 @@ export const AdminAuditLogsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Summary */}
-      <div className="mb-6 flex items-center gap-4">
-        <Badge variant="info">Total logs: {logs.length}</Badge>
-        <Badge variant="primary">Filtered: {filteredLogs.length}</Badge>
+      {/* Summary and Export */}
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Badge variant="info">Total logs: {logs.length}</Badge>
+          <Badge variant="primary">Filtered: {filteredLogs.length}</Badge>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={handleExportExcel}>
+            <ArrowDownTrayIcon className="w-4 h-4 mr-2" />
+            Export Excel
+          </Button>
+          <Button variant="secondary" onClick={handleExportPDF}>
+            <ArrowDownTrayIcon className="w-4 h-4 mr-2" />
+            Export PDF
+          </Button>
+        </div>
       </div>
 
       {/* Table */}
