@@ -6,7 +6,7 @@ import { comparePassword, hashPassword, validatePasswordStrength } from '../util
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt';
 import { emailService } from '../services/email.service';
 import { createAuditLog } from '../utils/auditLog';
-import { authConfig } from '../config/auth';
+
 
 export const login = async (req: AuthRequest, res: Response): Promise<void> => {
     try {

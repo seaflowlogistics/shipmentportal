@@ -272,6 +272,99 @@ export const ShipmentDetailPage: React.FC = () => {
                         )}
                     </CardBody>
                 </Card>
+                
+                {/* Invoice & Customs Details */}
+                <Card>
+                    <CardHeader>
+                        <h2 className="text-xl font-semibold text-gray-900">Invoice & Customs Details</h2>
+                    </CardHeader>
+                    <CardBody className="space-y-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <p className="text-sm text-gray-600">Invoice No</p>
+                                <p className="text-gray-900">{shipment.invoice_no || '-'}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-600">Invoice Items</p>
+                                <p className="text-gray-900">{shipment.invoice_item_count || '-'}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-600">Customs R Form</p>
+                                <p className="text-gray-900">{shipment.customs_r_form || '-'}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-600">BL/AWB No</p>
+                                <p className="text-gray-900">{shipment.bl_awb_no || '-'}</p>
+                            </div>
+                        </div>
+                    </CardBody>
+                </Card>
+
+                {/* Container & Cargo Details */}
+                <Card>
+                    <CardHeader>
+                        <h2 className="text-xl font-semibold text-gray-900">Container & Cargo Details</h2>
+                    </CardHeader>
+                    <CardBody className="space-y-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <p className="text-sm text-gray-600">Container No</p>
+                                <p className="text-gray-900">{shipment.container_no || '-'}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-600">Container Type</p>
+                                <p className="text-gray-900">{shipment.container_type || '-'}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-600">CBM</p>
+                                <p className="text-gray-900">{shipment.cbm || '-'}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-600">Gross Weight</p>
+                                <p className="text-gray-900">{shipment.gross_weight || '-'} kg</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-600">Package Count</p>
+                                <p className="text-gray-900">{shipment.package_count || '-'}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-600">Cleared Date</p>
+                                <p className="text-gray-900">{shipment.cleared_date ? formatDate(shipment.cleared_date) : '-'}</p>
+                            </div>
+                        </div>
+                    </CardBody>
+                </Card>
+
+                {/* Expenses */}
+                <Card>
+                    <CardHeader>
+                        <h2 className="text-xl font-semibold text-gray-900">Expenses</h2>
+                    </CardHeader>
+                    <CardBody className="space-y-3">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <p className="text-sm text-gray-600">MACL</p>
+                                <p className="text-gray-900">{shipment.currency} {shipment.expense_macl ? Number(shipment.expense_macl).toFixed(2) : '0.00'}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-600">MPL</p>
+                                <p className="text-gray-900">{shipment.currency} {shipment.expense_mpl ? Number(shipment.expense_mpl).toFixed(2) : '0.00'}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-600">MCS</p>
+                                <p className="text-gray-900">{shipment.currency} {shipment.expense_mcs ? Number(shipment.expense_mcs).toFixed(2) : '0.00'}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-600">Transportation</p>
+                                <p className="text-gray-900">{shipment.currency} {shipment.expense_transportation ? Number(shipment.expense_transportation).toFixed(2) : '0.00'}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-600">Liner</p>
+                                <p className="text-gray-900">{shipment.currency} {shipment.expense_liner ? Number(shipment.expense_liner).toFixed(2) : '0.00'}</p>
+                            </div>
+                        </div>
+                    </CardBody>
+                </Card>
 
                 {/* Shipment Details */}
                 <Card>
@@ -296,7 +389,7 @@ export const ShipmentDetailPage: React.FC = () => {
                             )}
                             <div>
                                 <p className="text-sm text-gray-600">Value</p>
-                                <p className="text-gray-900">{shipment.currency} {shipment.value.toFixed(2)}</p>
+                                <p className="text-gray-900">{shipment.currency} {Number(shipment.value).toFixed(2)}</p>
                             </div>
                             <div>
                                 <p className="text-sm text-gray-600">Mode of Transport</p>

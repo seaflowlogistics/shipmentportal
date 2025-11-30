@@ -39,7 +39,7 @@ export function validateDocumentUpload(req: Request, res: Response, next: NextFu
 /**
  * Error handler for multer file upload errors
  */
-export function handleUploadError(err: any, req: Request, res: Response, next: NextFunction): void {
+export function handleUploadError(err: any, _req: Request, res: Response, next: NextFunction): void {
     if (err) {
         if (err.code === 'LIMIT_FILE_SIZE') {
             res.status(400).json({

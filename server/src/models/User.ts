@@ -31,6 +31,7 @@ export interface UpdateUserData {
     role?: string;
     full_name?: string;
     is_active?: boolean;
+    must_change_password?: boolean;
 }
 
 export class UserModel {
@@ -88,6 +89,10 @@ export class UserModel {
         if (data.is_active !== undefined) {
             fields.push(`is_active = $${paramCount++}`);
             values.push(data.is_active);
+        }
+        if (data.must_change_password !== undefined) {
+            fields.push(`must_change_password = $${paramCount++}`);
+            values.push(data.must_change_password);
         }
 
         // Always update updated_at timestamp (application-level for CockroachDB/PostgreSQL compatibility)

@@ -48,6 +48,21 @@ export const CreateShipmentPage: React.FC = () => {
     pickup_date: '',
     expected_delivery_date: '',
     mode_of_transport: 'sea',
+    invoice_no: '',
+    invoice_item_count: '',
+    customs_r_form: '',
+    bl_awb_no: '',
+    container_no: '',
+    container_type: '',
+    cbm: '',
+    gross_weight: '',
+    package_count: '',
+    cleared_date: '',
+    expense_macl: '',
+    expense_mpl: '',
+    expense_mcs: '',
+    expense_transportation: '',
+    expense_liner: '',
   });
 
   const handleInputChange = (
@@ -126,7 +141,24 @@ export const CreateShipmentPage: React.FC = () => {
         return;
       }
 
-      const response = await shipmentsApi.create(formData);
+      const shipmentData = {
+        ...formData,
+        weight: parseFloat(formData.weight),
+        value: parseFloat(formData.value),
+        dimensions_length: formData.dimensions_length ? parseFloat(formData.dimensions_length) : undefined,
+        dimensions_width: formData.dimensions_width ? parseFloat(formData.dimensions_width) : undefined,
+        dimensions_height: formData.dimensions_height ? parseFloat(formData.dimensions_height) : undefined,
+        invoice_item_count: formData.invoice_item_count ? parseInt(formData.invoice_item_count) : undefined,
+        cbm: formData.cbm ? parseFloat(formData.cbm) : undefined,
+        gross_weight: formData.gross_weight ? parseFloat(formData.gross_weight) : undefined,
+        expense_macl: formData.expense_macl ? parseFloat(formData.expense_macl) : undefined,
+        expense_mpl: formData.expense_mpl ? parseFloat(formData.expense_mpl) : undefined,
+        expense_mcs: formData.expense_mcs ? parseFloat(formData.expense_mcs) : undefined,
+        expense_transportation: formData.expense_transportation ? parseFloat(formData.expense_transportation) : undefined,
+        expense_liner: formData.expense_liner ? parseFloat(formData.expense_liner) : undefined,
+      };
+
+      const response = await shipmentsApi.create(shipmentData as any);
       setShipmentId(response.shipment.id);
       success('Shipment created successfully! You can now upload documents.');
     } catch (err: any) {

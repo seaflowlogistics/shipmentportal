@@ -24,15 +24,23 @@ const storage: StorageEngine = multer.diskStorage({
 
 // File filter
 const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-    const allowedMimes = ['application/pdf', 'image/jpeg', 'image/jpg'];
-    const allowedExtensions = ['.pdf', '.jpg', '.jpeg'];
+    const allowedMimes = [
+        'application/pdf',
+        'image/jpeg',
+        'image/jpg',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+        'application/vnd.ms-excel', // .xls
+        'text/csv', // .csv
+        'application/json' // .json
+    ];
+    const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.xlsx', '.xls', '.csv', '.json'];
 
     const ext = path.extname(file.originalname).toLowerCase();
 
-    if (allowedMimes.includes(file.mimetype) && allowedExtensions.includes(ext)) {
+    if (allowedMimes.includes(file.mimetype) || allowedExtensions.includes(ext)) {
         cb(null, true);
     } else {
-        cb(new Error(`Invalid file type. Only PDF and JPEG files are allowed. Received: ${file.mimetype}`));
+        cb(new Error(`Invalid file type. Allowed types: PDF, JPEG, Excel, CSV, JSON. Received: ${file.mimetype}`));
     }
 };
 

@@ -18,6 +18,7 @@ import {
 } from '../components';
 import { useToast } from '../hooks/useToast';
 import { DocumentArrowDownIcon, DocumentPlusIcon, EyeIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { exportToCSV, exportToJSON, prepareShipmentsForExport } from '../utils/export';
 
 export const ShipmentsListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -77,7 +78,6 @@ export const ShipmentsListPage: React.FC = () => {
   };
 
   const handleExport = (format: 'csv' | 'json') => {
-    const { exportToCSV, exportToJSON, prepareShipmentsForExport } = require('../utils/export');
     const exportData = prepareShipmentsForExport(shipments);
 
     if (format === 'csv') {
@@ -184,7 +184,7 @@ export const ShipmentsListPage: React.FC = () => {
                   <TableCell>{shipment.receiver_name}</TableCell>
                   <TableCell className="capitalize">{shipment.mode_of_transport}</TableCell>
                   <TableCell>
-                    {shipment.currency} {shipment.value.toFixed(2)}
+                    {shipment.currency} {Number(shipment.value).toFixed(2)}
                   </TableCell>
                   <TableCell>{formatDate(shipment.pickup_date)}</TableCell>
                   <TableCell>

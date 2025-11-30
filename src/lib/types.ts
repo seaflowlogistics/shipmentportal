@@ -75,3 +75,54 @@ export interface ApiError {
     message?: string;
     details?: string[];
 }
+
+export interface Shipment {
+    id: string;
+    shipment_id: string;
+    exporter_name: string;
+    exporter_address: string;
+    exporter_contact?: string;
+    exporter_email?: string;
+    vendor_name: string;
+    vendor_address: string;
+    vendor_contact?: string;
+    vendor_email?: string;
+    receiver_name: string;
+    receiver_address: string;
+    receiver_contact?: string;
+    receiver_email?: string;
+    item_description: string;
+    weight: number;
+    weight_unit: string;
+    dimensions_length?: number;
+    dimensions_width?: number;
+    dimensions_height?: number;
+    dimensions_unit: string;
+    value: number;
+    currency: string;
+    pickup_date: string;
+    expected_delivery_date: string;
+    mode_of_transport: 'air' | 'sea' | 'road';
+    status: 'new' | 'created' | 'approved' | 'rejected' | 'changes_requested' | 'in_transit' | 'delivered' | 'cancelled';
+    rejection_reason?: string;
+    created_by?: string;
+    last_updated_by?: string;
+    created_at: string;
+    updated_at: string;
+    // New fields
+    invoice_no?: string;
+    invoice_item_count?: number;
+    customs_r_form?: string;
+    bl_awb_no?: string;
+    container_no?: string;
+    container_type?: string;
+    cbm?: number;
+    gross_weight?: number;
+    package_count?: string;
+    cleared_date?: string;
+    expense_macl?: number;
+    expense_mpl?: number;
+    expense_mcs?: number;
+    expense_transportation?: number;
+    expense_liner?: number;
+}

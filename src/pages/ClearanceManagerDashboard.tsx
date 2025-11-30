@@ -172,7 +172,7 @@ export const ClearanceManagerDashboard: React.FC = () => {
                     <div className="flex justify-between">
                       <span className="text-gray-600">Value:</span>
                       <span className="font-medium text-gray-900">
-                        {shipment.currency} {shipment.value.toFixed(2)}
+                        {shipment.currency} {Number(shipment.value).toFixed(2)}
                       </span>
                     </div>
                     <div className="flex justify-between">
