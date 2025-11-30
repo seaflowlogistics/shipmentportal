@@ -14,7 +14,7 @@ export const authConfig = {
 
 export const emailConfig = {
     smtp: {
-        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        host: process.env.SMTP_HOST || 'mail.shipmentportal.com',
         port: parseInt(process.env.SMTP_PORT || '587'),
         secure: process.env.SMTP_SECURE === 'true',
         auth: {
@@ -22,7 +22,8 @@ export const emailConfig = {
             pass: process.env.SMTP_PASS,
         },
     },
-    from: process.env.EMAIL_FROM || 'noreply@shipmentportal.com',
+    from: process.env.SMTP_USER || 'noreply@shipmentportal.com',
+    fromName: process.env.EMAIL_FROM_NAME || 'SeaFlow Logistics',
 };
 
 export const appConfig = {

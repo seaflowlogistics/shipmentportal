@@ -24,18 +24,6 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
             return;
         }
 
-        // Check if account is locked
-        if (user.locked_until && new Date(user.locked_until) > new Date()) {
-            const minutesLeft = Math.ceil(
-                (new Date(user.locked_until).getTime() - new Date().getTime()) / 60000
-            );
-            res.status(423).json({
-                error: 'Account locked',
-                message: `Too many failed login attempts. Try again in ${minutesLeft} minutes.`,
-            });
-            return;
-        }
-
         // Check if account is active
         if (!user.is_active) {
             res.status(403).json({ error: 'Account is inactive' });
@@ -45,28 +33,6 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
         // Verify password
         const isValidPassword = await comparePassword(password, user.password_hash);
         if (!isValidPassword) {
-            await UserModel.incrementFailedAttempts(user.id);
-
-            // Lock account if max attempts reached
-            if (user.failed_login_attempts + 1 >= authConfig.maxLoginAttempts) {
-                const lockUntil = new Date(Date.now() + authConfig.lockTime * 60 * 1000);
-                await UserModel.lockAccount(user.id, lockUntil);
-
-                await createAuditLog({
-                    userId: user.id,
-                    action: 'ACCOUNT_LOCKED',
-                    details: { reason: 'Max login attempts exceeded' },
-                    ipAddress: req.ip,
-                    userAgent: req.get('user-agent'),
-                });
-
-                res.status(423).json({
-                    error: 'Account locked',
-                    message: `Too many failed login attempts. Account locked for ${authConfig.lockTime} minutes.`,
-                });
-                return;
-            }
-
             await createAuditLog({
                 userId: user.id,
                 action: 'LOGIN_FAILED',
@@ -79,8 +45,7 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
             return;
         }
 
-        // Reset failed attempts
-        await UserModel.resetFailedAttempts(user.id);
+        // Update last login
         await UserModel.updateLastLogin(user.id);
 
         // Generate tokens
@@ -115,6 +80,7 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
                 email: user.email,
                 role: user.role,
                 fullName: user.full_name,
+                isActive: user.is_active,
                 mustChangePassword: user.must_change_password,
             },
             accessToken,
@@ -170,7 +136,12 @@ export const refreshAccessToken = async (req: AuthRequest, res: Response): Promi
         }
 
         // Get user
-        const user = await UserModel.findById(payload.userId);
+        const userId = payload.userId || payload.id;
+        if (!userId) {
+            res.status(401).json({ error: 'Invalid token' });
+            return;
+        }
+        const user = await UserModel.findById(userId);
         if (!user || !user.is_active) {
             res.status(401).json({ error: 'User not found or inactive' });
             return;
@@ -213,9 +184,9 @@ export const forgotPassword = async (req: AuthRequest, res: Response): Promise<v
 
         const user = await UserModel.findByEmail(email);
 
-        // Always return success to prevent email enumeration
+        // For MVP without email: return generic response for non-existent emails (prevent enumeration)
         if (!user) {
-            res.json({ message: 'If the email exists, a password reset link has been sent' });
+            res.json({ message: 'If the email exists, you can reset your password' });
             return;
         }
 
@@ -226,9 +197,8 @@ export const forgotPassword = async (req: AuthRequest, res: Response): Promise<v
         const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
         const resetToken = await PasswordResetTokenModel.create(user.id, expiresAt);
 
-        // Send email
-        await sendPasswordResetEmail(user.email, user.username, resetToken.token);
-
+        // For MVP without email: return the token directly to the user
+        // In production with email, this token would be sent via email instead
         await createAuditLog({
             userId: user.id,
             action: 'PASSWORD_RESET_REQUESTED',
@@ -236,7 +206,10 @@ export const forgotPassword = async (req: AuthRequest, res: Response): Promise<v
             userAgent: req.get('user-agent'),
         });
 
-        res.json({ message: 'If the email exists, a password reset link has been sent' });
+        res.json({
+            message: 'Password reset token generated. Use this token to reset your password.',
+            token: resetToken.token
+        });
     } catch (error) {
         console.error('Forgot password error:', error);
         res.status(500).json({ error: 'Failed to process password reset request' });
@@ -301,8 +274,8 @@ export const changePassword = async (req: AuthRequest, res: Response): Promise<v
 
         const { currentPassword, newPassword } = req.body;
 
-        if (!currentPassword || !newPassword) {
-            res.status(400).json({ error: 'Current and new password are required' });
+        if (!newPassword) {
+            res.status(400).json({ error: 'New password is required' });
             return;
         }
 
@@ -314,24 +287,40 @@ export const changePassword = async (req: AuthRequest, res: Response): Promise<v
         }
 
         // Get user
-        const user = await UserModel.findById(req.user.userId);
+        const userId = req.user.userId || req.user.id;
+        if (!userId) {
+            res.status(401).json({ error: 'Invalid authentication' });
+            return;
+        }
+        const user = await UserModel.findById(userId);
         if (!user) {
             res.status(404).json({ error: 'User not found' });
             return;
         }
 
-        // Verify current password
-        const isValidPassword = await comparePassword(currentPassword, user.password_hash);
-        if (!isValidPassword) {
-            res.status(401).json({ error: 'Current password is incorrect' });
+        // If user is not forced to change password, verify current password
+        if (!user.must_change_password && !currentPassword) {
+            res.status(400).json({ error: 'Current password is required' });
             return;
+        }
+
+        if (!user.must_change_password) {
+            // Verify current password for normal password change
+            const isValidPassword = await comparePassword(currentPassword, user.password_hash);
+            if (!isValidPassword) {
+                res.status(401).json({ error: 'Current password is incorrect' });
+                return;
+            }
         }
 
         // Hash new password
         const passwordHash = await hashPassword(newPassword);
 
-        // Update password
+        // Update password and clear must_change_password flag
         await UserModel.updatePassword(user.id, passwordHash);
+        if (user.must_change_password) {
+            await UserModel.update(user.id, { must_change_password: false });
+        }
 
         await createAuditLog({
             userId: user.id,
@@ -354,7 +343,12 @@ export const getCurrentUser = async (req: AuthRequest, res: Response): Promise<v
             return;
         }
 
-        const user = await UserModel.findById(req.user.userId);
+        const userId = req.user.userId || req.user.id;
+        if (!userId) {
+            res.status(401).json({ error: 'Invalid authentication' });
+            return;
+        }
+        const user = await UserModel.findById(userId);
         if (!user) {
             res.status(404).json({ error: 'User not found' });
             return;

@@ -1,23 +1,32 @@
 import jwt from 'jsonwebtoken';
+import { v4 as uuidv4 } from 'uuid';
 import { authConfig } from '../config/auth';
 
 export interface TokenPayload {
-    userId: string;
+    userId?: string;
+    id?: string;
     username: string;
     email: string;
     role: string;
+    jti?: string;
 }
 
 export const generateAccessToken = (payload: TokenPayload): string => {
-    return jwt.sign(payload, authConfig.jwtSecret, {
-        expiresIn: authConfig.jwtExpiresIn,
-    });
+    const tokenPayload: any = { ...payload, jti: uuidv4() };
+    return jwt.sign(
+        tokenPayload,
+        authConfig.jwtSecret as any,
+        { expiresIn: authConfig.jwtExpiresIn } as any
+    );
 };
 
 export const generateRefreshToken = (payload: TokenPayload): string => {
-    return jwt.sign(payload, authConfig.jwtRefreshSecret, {
-        expiresIn: authConfig.jwtRefreshExpiresIn,
-    });
+    const tokenPayload: any = { ...payload, jti: uuidv4() };
+    return jwt.sign(
+        tokenPayload,
+        authConfig.jwtRefreshSecret as any,
+        { expiresIn: authConfig.jwtRefreshExpiresIn } as any
+    );
 };
 
 export const verifyAccessToken = (token: string): TokenPayload => {

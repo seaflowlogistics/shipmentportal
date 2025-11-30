@@ -1,194 +1,265 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { shipmentsApi } from '../lib/api';
-import '../styles/dashboard.css';
+import {
+  Button,
+  Card,
+  CardBody,
+  Badge,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableHeaderCell,
+  Loading,
+  EmptyState,
+  ToastContainer,
+} from '../components';
+import { useToast } from '../hooks/useToast';
+import {
+  DocumentPlusIcon,
+  ClipboardDocumentListIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  ArrowPathIcon,
+  DocumentArrowDownIcon
+} from '@heroicons/react/24/outline';
 
 export const AdminDashboard: React.FC = () => {
-    const navigate = useNavigate();
-    const [stats, setStats] = useState<any>(null);
-    const [recentShipments, setRecentShipments] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const { toasts, removeToast, error: showError } = useToast();
+  const [stats, setStats] = useState<any>(null);
+  const [recentShipments, setRecentShipments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchDashboardData();
-    }, []);
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
-    const fetchDashboardData = async () => {
-        try {
-            setLoading(true);
-            const response = await shipmentsApi.getStatistics();
-            setStats(response.statistics);
-            setRecentShipments(response.recentShipments);
-            setError('');
-        } catch (err: any) {
-            setError('Failed to load dashboard data');
-            console.error('Dashboard error:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const formatDate = (date: string) => {
-        return new Date(date).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
-    };
-
-    const formatNumber = (num: number) => {
-        return num || 0;
-    };
-
-    if (loading) {
-        return <div className="dashboard-loading">Loading dashboard...</div>;
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const response = await shipmentsApi.getStatistics();
+      setStats(response.statistics);
+      setRecentShipments(response.recentShipments || []);
+    } catch (err: any) {
+      showError('Failed to load dashboard data');
+      console.error('Dashboard error:', err);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    return (
-        <div className="dashboard-container">
-            <div className="dashboard-header">
-                <div>
-                    <h1>Admin Dashboard</h1>
-                    <p className="dashboard-subtitle">Central management view for all shipments</p>
-                </div>
-                <button
-                    onClick={() => navigate('/create-shipment')}
-                    className="btn-primary-action"
-                >
-                    Create Shipment
-                </button>
-            </div>
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
 
-            {error && <div className="error-banner">{error}</div>}
+  const formatNumber = (num: number) => {
+    return num || 0;
+  };
 
-            <div className="stats-grid">
-                <div className="stat-card">
-                    <div className="stat-header">
-                        <h3>Total Shipments</h3>
-                    </div>
-                    <div className="stat-body">
-                        <div className="stat-value">{formatNumber(stats?.total)}</div>
-                        <div className="stat-trend">All time records</div>
-                    </div>
-                </div>
+  const getStatusBadgeVariant = (status: string) => {
+    if (status === 'approved' || status === 'delivered') return 'success';
+    if (status === 'rejected') return 'danger';
+    if (status === 'in_transit') return 'warning';
+    if (status === 'changes_requested') return 'warning';
+    return 'info';
+  };
 
-                <div className="stat-card">
-                    <div className="stat-header">
-                        <h3>Pending Approval</h3>
-                    </div>
-                    <div className="stat-body">
-                        <div className="stat-value pending">{formatNumber(stats?.pending_approval)}</div>
-                        <div className="stat-trend">Awaiting review</div>
-                    </div>
-                </div>
+  const getStatusIcon = (status: string) => {
+    if (status === 'approved') return <CheckCircleIcon className="h-5 w-5" />;
+    if (status === 'rejected') return <XCircleIcon className="h-5 w-5" />;
+    if (status === 'in_transit') return <ArrowPathIcon className="h-5 w-5" />;
+    if (status === 'delivered') return <DocumentArrowDownIcon className="h-5 w-5" />;
+    return null;
+  };
 
-                <div className="stat-card">
-                    <div className="stat-header">
-                        <h3>Approved</h3>
-                    </div>
-                    <div className="stat-body">
-                        <div className="stat-value approved">{formatNumber(stats?.approved)}</div>
-                        <div className="stat-trend">Ready to ship</div>
-                    </div>
-                </div>
+  if (loading) {
+    return <Loading fullScreen message="Loading dashboard..." />;
+  }
 
-                <div className="stat-card">
-                    <div className="stat-header">
-                        <h3>Rejected</h3>
-                    </div>
-                    <div className="stat-body">
-                        <div className="stat-value rejected">{formatNumber(stats?.rejected)}</div>
-                        <div className="stat-trend">Needs attention</div>
-                    </div>
-                </div>
-
-                <div className="stat-card">
-                    <div className="stat-header">
-                        <h3>In Transit</h3>
-                    </div>
-                    <div className="stat-body">
-                        <div className="stat-value transit">{formatNumber(stats?.in_transit)}</div>
-                        <div className="stat-trend">Active shipments</div>
-                    </div>
-                </div>
-
-                <div className="stat-card">
-                    <div className="stat-header">
-                        <h3>Delivered</h3>
-                    </div>
-                    <div className="stat-body">
-                        <div className="stat-value delivered">{formatNumber(stats?.delivered)}</div>
-                        <div className="stat-trend">Completed</div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="dashboard-section">
-                <div className="section-header">
-                    <h2>Recent Shipments</h2>
-                    <button
-                        onClick={() => navigate('/shipments')}
-                        className="btn-link"
-                    >
-                        View All
-                    </button>
-                </div>
-
-                {recentShipments.length > 0 ? (
-                    <div className="shipments-table">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Shipment ID</th>
-                                    <th>From</th>
-                                    <th>To</th>
-                                    <th>Value</th>
-                                    <th>Mode</th>
-                                    <th>Pickup Date</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {recentShipments.map((shipment) => (
-                                    <tr key={shipment.id}>
-                                        <td className="shipment-id">{shipment.shipment_id}</td>
-                                        <td>{shipment.exporter_name}</td>
-                                        <td>{shipment.receiver_name}</td>
-                                        <td>{shipment.currency} {shipment.value.toFixed(2)}</td>
-                                        <td>{shipment.mode_of_transport.toUpperCase()}</td>
-                                        <td>{formatDate(shipment.pickup_date)}</td>
-                                        <td>
-                                            <span className={`status-badge status-${shipment.status}`}>
-                                                {shipment.status.replace(/_/g, ' ').toUpperCase()}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <button
-                                                onClick={() => navigate(`/shipment/${shipment.id}`)}
-                                                className="btn-view-link"
-                                            >
-                                                View
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                ) : (
-                    <div className="empty-state">
-                        <p>No shipments found. Create your first shipment to get started.</p>
-                        <button
-                            onClick={() => navigate('/create-shipment')}
-                            className="btn-primary"
-                        >
-                            Create Shipment
-                        </button>
-                    </div>
-                )}
-            </div>
+  return (
+    <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+          <p className="text-gray-600 mt-2">Central management view for all shipments</p>
         </div>
-    );
+        <Button leftIcon={<DocumentPlusIcon className="w-4 h-4" />} onClick={() => navigate('/create-shipment')}>
+          Create Shipment
+        </Button>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
+        {/* Total Shipments */}
+        <Card hoverable>
+          <CardBody className="flex items-center gap-4">
+            <div className="flex-shrink-0">
+              <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-blue-100">
+                <DocumentPlusIcon className="h-6 w-6 text-blue-600" />
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600">Total</p>
+              <p className="text-2xl font-bold text-gray-900">{formatNumber(stats?.total)}</p>
+              <p className="text-xs text-gray-500 mt-1">All time</p>
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* Pending Approval */}
+        <Card hoverable>
+          <CardBody className="flex items-center gap-4">
+            <div className="flex-shrink-0">
+              <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-yellow-100">
+                <ClipboardDocumentListIcon className="h-6 w-6 text-yellow-600" />
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600">Pending</p>
+              <p className="text-2xl font-bold text-gray-900">{formatNumber(stats?.pending_approval)}</p>
+              <p className="text-xs text-gray-500 mt-1">Awaiting review</p>
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* Approved */}
+        <Card hoverable>
+          <CardBody className="flex items-center gap-4">
+            <div className="flex-shrink-0">
+              <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-green-100">
+                <CheckCircleIcon className="h-6 w-6 text-green-600" />
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600">Approved</p>
+              <p className="text-2xl font-bold text-gray-900">{formatNumber(stats?.approved)}</p>
+              <p className="text-xs text-gray-500 mt-1">Ready to ship</p>
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* Rejected */}
+        <Card hoverable>
+          <CardBody className="flex items-center gap-4">
+            <div className="flex-shrink-0">
+              <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-red-100">
+                <XCircleIcon className="h-6 w-6 text-red-600" />
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600">Rejected</p>
+              <p className="text-2xl font-bold text-gray-900">{formatNumber(stats?.rejected)}</p>
+              <p className="text-xs text-gray-500 mt-1">Needs attention</p>
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* In Transit */}
+        <Card hoverable>
+          <CardBody className="flex items-center gap-4">
+            <div className="flex-shrink-0">
+              <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-purple-100">
+                <ArrowPathIcon className="h-6 w-6 text-purple-600" />
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600">In Transit</p>
+              <p className="text-2xl font-bold text-gray-900">{formatNumber(stats?.in_transit)}</p>
+              <p className="text-xs text-gray-500 mt-1">Active shipments</p>
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* Delivered */}
+        <Card hoverable>
+          <CardBody className="flex items-center gap-4">
+            <div className="flex-shrink-0">
+              <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-teal-100">
+                <DocumentArrowDownIcon className="h-6 w-6 text-teal-600" />
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600">Delivered</p>
+              <p className="text-2xl font-bold text-gray-900">{formatNumber(stats?.delivered)}</p>
+              <p className="text-xs text-gray-500 mt-1">Completed</p>
+            </div>
+          </CardBody>
+        </Card>
+      </div>
+
+      {/* Recent Shipments Section */}
+      <Card>
+        <CardBody>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold text-gray-900">Recent Shipments</h2>
+            <Button size="sm" variant="secondary" onClick={() => navigate('/shipments')}>
+              View All
+            </Button>
+          </div>
+
+          {recentShipments.length > 0 ? (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableHeaderCell>Shipment ID</TableHeaderCell>
+                    <TableHeaderCell>From</TableHeaderCell>
+                    <TableHeaderCell>To</TableHeaderCell>
+                    <TableHeaderCell>Value</TableHeaderCell>
+                    <TableHeaderCell>Mode</TableHeaderCell>
+                    <TableHeaderCell>Pickup Date</TableHeaderCell>
+                    <TableHeaderCell>Status</TableHeaderCell>
+                    <TableHeaderCell>Action</TableHeaderCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {recentShipments.map((shipment) => (
+                    <TableRow key={shipment.id}>
+                      <TableCell className="font-semibold text-blue-600">{shipment.shipment_id}</TableCell>
+                      <TableCell>{shipment.exporter_name}</TableCell>
+                      <TableCell>{shipment.receiver_name}</TableCell>
+                      <TableCell>
+                        {shipment.currency} {shipment.value.toFixed(2)}
+                      </TableCell>
+                      <TableCell className="capitalize">{shipment.mode_of_transport}</TableCell>
+                      <TableCell>{formatDate(shipment.pickup_date)}</TableCell>
+                      <TableCell>
+                        <Badge variant={getStatusBadgeVariant(shipment.status)} size="sm">
+                          {shipment.status.replace(/_/g, ' ')}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Button size="sm" onClick={() => navigate(`/shipment/${shipment.id}`)}>
+                          View
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <EmptyState
+              icon={<DocumentPlusIcon className="w-12 h-12 text-gray-400 mx-auto" />}
+              title="No shipments yet"
+              message="Create your first shipment to get started"
+              action={{
+                label: 'Create Shipment',
+                onClick: () => navigate('/create-shipment'),
+              }}
+            />
+          )}
+        </CardBody>
+      </Card>
+
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
+    </div>
+  );
 };

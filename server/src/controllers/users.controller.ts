@@ -123,7 +123,7 @@ export const createUser = async (req: AuthRequest, res: Response): Promise<void>
                 fullName: newUser.full_name,
                 isActive: newUser.is_active,
             },
-            temporaryPassword: password ? undefined : userPassword,
+            temporaryPassword: userPassword,
         });
     } catch (error) {
         console.error('Create user error:', error);
@@ -227,6 +227,10 @@ export const deleteUser = async (req: AuthRequest, res: Response): Promise<void>
             res.status(404).json({ error: 'User not found' });
             return;
         }
+
+        // Before deleting, we need to handle foreign key constraints
+        // by nullifying references in other tables
+        await UserModel.nullifyUserReferences(id);
 
         // Delete user
         const deleted = await UserModel.delete(id);

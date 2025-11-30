@@ -3,7 +3,7 @@ import { AuthRequest } from '../middleware/auth.middleware';
 import { DocumentModel } from '../models/Document';
 import { ShipmentModel } from '../models/Shipment';
 import { createAuditLog } from '../utils/auditLog';
-import { deleteUploadedFile, getStoragePath } from '../middleware/upload.middleware';
+import { deleteUploadedFile } from '../middleware/upload.middleware';
 
 // Upload Document
 export const uploadDocument = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -34,7 +34,8 @@ export const uploadDocument = async (req: AuthRequest, res: Response): Promise<v
         }
 
         // Only creator or admin can upload documents
-        if (shipment.created_by !== req.user!.id && req.user!.role !== 'admin') {
+        const userId = req.user!.id || req.user!.userId;
+        if (shipment.created_by !== userId && req.user!.role !== 'admin') {
             // Clean up uploaded file
             deleteUploadedFile(file.path);
             res.status(403).json({ error: 'You do not have permission to upload documents for this shipment' });
@@ -49,7 +50,7 @@ export const uploadDocument = async (req: AuthRequest, res: Response): Promise<v
             file_path: file.path,
             file_size: file.size,
             file_type: file.mimetype,
-            uploaded_by: req.user!.id
+            uploaded_by: (req.user!.id || req.user!.userId)!
         });
 
         // Audit log
@@ -124,9 +125,10 @@ export const deleteDocument = async (req: AuthRequest, res: Response): Promise<v
         }
 
         // Only creator, shipment creator or admin can delete
+        const userId = req.user!.id || req.user!.userId;
         if (
-            document.uploaded_by !== req.user!.id &&
-            shipment.created_by !== req.user!.id &&
+            document.uploaded_by !== userId &&
+            shipment.created_by !== userId &&
             req.user!.role !== 'admin'
         ) {
             res.status(403).json({ error: 'You do not have permission to delete this document' });

@@ -11,7 +11,7 @@ import type {
     UpdateUserData,
 } from './types';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 // Create axios instance
 const api: AxiosInstance = axios.create({
@@ -95,7 +95,7 @@ export const authApi = {
         return response.data;
     },
 
-    changePassword: async (data: ChangePasswordData): Promise<{ message: string }> => {
+    changePassword: async (data: ChangePasswordData | { newPassword: string }): Promise<{ message: string }> => {
         const response = await api.post('/auth/change-password', data);
         return response.data;
     },
@@ -105,7 +105,7 @@ export const authApi = {
         return response.data;
     },
 
-    resetPassword: async (data: ResetPasswordData): Promise<{ message: string }> => {
+    resetPassword: async (data: ResetPasswordData | { token: string; newPassword: string }): Promise<{ message: string }> => {
         const response = await api.post('/auth/reset-password', data);
         return response.data;
     },
@@ -227,6 +227,19 @@ export const documentsApi = {
         const response = await api.get(`/documents/${documentId}/download`, {
             responseType: 'blob',
         });
+        return response.data;
+    },
+};
+
+// Audit Logs API
+export const auditLogsApi = {
+    list: async (params?: {
+        action?: string;
+        entity_type?: string;
+        dateFrom?: string;
+        dateTo?: string;
+    }): Promise<any> => {
+        const response = await api.get('/audit-logs', { params });
         return response.data;
     },
 };

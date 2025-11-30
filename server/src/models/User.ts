@@ -90,7 +90,12 @@ export class UserModel {
             values.push(data.is_active);
         }
 
-        if (fields.length === 0) {
+        // Always update updated_at timestamp (application-level for CockroachDB/PostgreSQL compatibility)
+        fields.push(`updated_at = $${paramCount++}`);
+        values.push(new Date());
+
+        if (fields.length === 1) {
+            // Only updated_at was set, nothing else to update
             return this.findById(id);
         }
 
@@ -99,6 +104,23 @@ export class UserModel {
 
         const result = await pool.query(query, values);
         return result.rows[0] || null;
+    }
+
+    static async nullifyUserReferences(id: string): Promise<void> {
+        // Nullify references in other tables to avoid foreign key constraint errors
+        await Promise.all([
+            // Nullify created_by in users table (users created by this user)
+            pool.query('UPDATE users SET created_by = NULL WHERE created_by = $1', [id]),
+            // Nullify created_by and last_updated_by in shipments table
+            pool.query('UPDATE shipments SET created_by = NULL WHERE created_by = $1', [id]),
+            pool.query('UPDATE shipments SET last_updated_by = NULL WHERE last_updated_by = $1', [id]),
+            // Nullify uploaded_by in documents table
+            pool.query('UPDATE documents SET uploaded_by = NULL WHERE uploaded_by = $1', [id]),
+            // Nullify user_id in audit_logs table
+            pool.query('UPDATE audit_logs SET user_id = NULL WHERE user_id = $1', [id]),
+            // Note: refresh_tokens and password_reset_tokens have ON DELETE CASCADE
+            // so they will be automatically deleted
+        ]);
     }
 
     static async delete(id: string): Promise<boolean> {

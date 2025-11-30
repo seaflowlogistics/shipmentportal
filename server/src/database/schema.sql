@@ -1,19 +1,6 @@
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Function to update updated_at timestamp
-DROP TRIGGER IF EXISTS update_users_updated_at ON users;
-DROP TRIGGER IF EXISTS update_shipments_updated_at ON shipments;
-DROP FUNCTION IF EXISTS update_updated_at_column();
-
-CREATE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -38,11 +25,8 @@ CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 CREATE INDEX IF NOT EXISTS idx_users_is_active ON users(is_active);
 
--- Trigger to automatically update updated_at
-CREATE TRIGGER update_users_updated_at
-  BEFORE UPDATE ON users
-  FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
+-- Note: updated_at is now managed by the application layer (see UserModel.update)
+-- This ensures compatibility with both CockroachDB and PostgreSQL
 
 -- Audit logs table
 CREATE TABLE IF NOT EXISTS audit_logs (
@@ -132,11 +116,8 @@ CREATE INDEX IF NOT EXISTS idx_shipments_pickup_date ON shipments(pickup_date);
 CREATE INDEX IF NOT EXISTS idx_shipments_created_at ON shipments(created_at);
 CREATE INDEX IF NOT EXISTS idx_shipments_mode ON shipments(mode_of_transport);
 
--- Trigger to automatically update shipments updated_at
-CREATE TRIGGER update_shipments_updated_at
-  BEFORE UPDATE ON shipments
-  FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
+-- Note: updated_at is now managed by the application layer (see ShipmentModel.update)
+-- This ensures compatibility with both CockroachDB and PostgreSQL
 
 -- Documents table
 CREATE TABLE IF NOT EXISTS documents (

@@ -11,7 +11,6 @@ import {
     requestChanges
 } from '../controllers/shipments.controller';
 import { authenticate } from '../middleware/auth.middleware';
-import { requireClearanceManager, requireAccounts, requireAdmin } from '../middleware/role.middleware';
 
 const router = Router();
 
@@ -25,10 +24,11 @@ router.get('/', listShipments);
 router.get('/stats/dashboard', getStatistics);
 
 // Create shipment (ClearanceManager and Admin)
-router.post('/', (req, res, next) => {
+router.post('/', (req, res, next): void => {
     const user = (req as any).user;
     if (user.role !== 'clearance_manager' && user.role !== 'admin') {
-        return res.status(403).json({ error: 'Only clearance managers can create shipments' });
+        res.status(403).json({ error: 'Only clearance managers can create shipments' });
+        return;
     }
     next();
 }, createShipment);
@@ -40,37 +40,41 @@ router.get('/:id', getShipmentById);
 router.put('/:id', updateShipment);
 
 // Delete shipment (Admin only)
-router.delete('/:id', (req, res, next) => {
+router.delete('/:id', (req, res, next): void => {
     const user = (req as any).user;
     if (user.role !== 'admin') {
-        return res.status(403).json({ error: 'Only admins can delete shipments' });
+        res.status(403).json({ error: 'Only admins can delete shipments' });
+        return;
     }
     next();
 }, deleteShipment);
 
 // Approve shipment (Accounts only)
-router.post('/:id/approve', (req, res, next) => {
+router.post('/:id/approve', (req, res, next): void => {
     const user = (req as any).user;
     if (user.role !== 'accounts') {
-        return res.status(403).json({ error: 'Only accounts managers can approve shipments' });
+        res.status(403).json({ error: 'Only accounts managers can approve shipments' });
+        return;
     }
     next();
 }, approveShipment);
 
 // Reject shipment (Accounts only)
-router.post('/:id/reject', (req, res, next) => {
+router.post('/:id/reject', (req, res, next): void => {
     const user = (req as any).user;
     if (user.role !== 'accounts') {
-        return res.status(403).json({ error: 'Only accounts managers can reject shipments' });
+        res.status(403).json({ error: 'Only accounts managers can reject shipments' });
+        return;
     }
     next();
 }, rejectShipment);
 
 // Request changes (Accounts only)
-router.post('/:id/request-changes', (req, res, next) => {
+router.post('/:id/request-changes', (req, res, next): void => {
     const user = (req as any).user;
     if (user.role !== 'accounts') {
-        return res.status(403).json({ error: 'Only accounts managers can request changes' });
+        res.status(403).json({ error: 'Only accounts managers can request changes' });
+        return;
     }
     next();
 }, requestChanges);
