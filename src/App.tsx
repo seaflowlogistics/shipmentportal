@@ -2,29 +2,103 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { RoleBasedRoute } from './components/auth/RoleBasedRoute';
+import { Navigation } from './components/Navigation';
 import { ROUTES } from './utils/constants';
 import { LoginPage } from './pages/LoginPage';
+import { CreateShipmentPage } from './pages/CreateShipmentPage';
+import { ShipmentsListPage } from './pages/ShipmentsListPage';
+import { ShipmentDetailPage } from './pages/ShipmentDetailPage';
+import { EditShipmentPage } from './pages/EditShipmentPage';
+import { AdminDashboard } from './pages/AdminDashboard';
+import { AccountsDashboard } from './pages/AccountsDashboard';
+import { ClearanceManagerDashboard } from './pages/ClearanceManagerDashboard';
+import { AdminUsersPage } from './pages/AdminUsersPage';
+import { AdminAuditLogsPage } from './pages/AdminAuditLogsPage';
 
-const AdminDashboard = () => (
-  <div className="min-h-screen bg-gray-50 p-8">
-    <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-    <p className="mt-4">Welcome, Administrator!</p>
-  </div>
-);
+function AppContent() {
+  return (
+    <>
+      <Navigation />
+      <Routes>
+        {/* Dashboard routes */}
+        <Route
+          path="/admin/dashboard"
+          element={
+            <RoleBasedRoute allowedRoles={['admin']}>
+              <AdminDashboard />
+            </RoleBasedRoute>
+          }
+        />
 
-const AccountsDashboard = () => (
-  <div className="min-h-screen bg-gray-50 p-8">
-    <h1 className="text-3xl font-bold">Accounts Dashboard</h1>
-    <p className="mt-4">Welcome, Accounts Manager!</p>
-  </div>
-);
+        <Route
+          path="/accounts/dashboard"
+          element={
+            <RoleBasedRoute allowedRoles={['accounts']}>
+              <AccountsDashboard />
+            </RoleBasedRoute>
+          }
+        />
 
-const ClearanceDashboard = () => (
-  <div className="min-h-screen bg-gray-50 p-8">
-    <h1 className="text-3xl font-bold">Clearance Dashboard</h1>
-    <p className="mt-4">Welcome, Clearance Manager!</p>
-  </div>
-);
+        <Route
+          path="/clearance/dashboard"
+          element={
+            <RoleBasedRoute allowedRoles={['clearance_manager']}>
+              <ClearanceManagerDashboard />
+            </RoleBasedRoute>
+          }
+        />
+
+        {/* Shipment routes */}
+        <Route path="/shipments" element={<ShipmentsListPage />} />
+
+        <Route
+          path="/create-shipment"
+          element={
+            <RoleBasedRoute allowedRoles={['admin', 'clearance_manager']}>
+              <CreateShipmentPage />
+            </RoleBasedRoute>
+          }
+        />
+
+        <Route path="/shipment/:id" element={<ShipmentDetailPage />} />
+
+        <Route
+          path="/edit-shipment/:id"
+          element={
+            <RoleBasedRoute allowedRoles={['admin', 'clearance_manager', 'accounts']}>
+              <EditShipmentPage />
+            </RoleBasedRoute>
+          }
+        />
+
+        {/* Admin routes */}
+        <Route
+          path="/admin/users"
+          element={
+            <RoleBasedRoute allowedRoles={['admin']}>
+              <AdminUsersPage />
+            </RoleBasedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/audit-logs"
+          element={
+            <RoleBasedRoute allowedRoles={['admin']}>
+              <AdminAuditLogsPage />
+            </RoleBasedRoute>
+          }
+        />
+
+        {/* Dashboard redirect */}
+        <Route path="/dashboard" element={<Navigate to={ROUTES.ADMIN_DASHBOARD} replace />} />
+
+        {/* Default redirect for root */}
+        <Route path="/" element={<Navigate to={ROUTES.ADMIN_DASHBOARD} replace />} />
+      </Routes>
+    </>
+  );
+}
 
 function App() {
   return (
@@ -32,46 +106,19 @@ function App() {
       <Routes>
         {/* Public routes */}
         <Route path={ROUTES.LOGIN} element={<LoginPage />} />
-        
-        {/* Protected routes - Admin */}
+
+        {/* All protected routes wrapped with AppContent - must come before specific dashboard routes */}
         <Route
-          path={ROUTES.ADMIN_DASHBOARD}
+          path="/*"
           element={
             <ProtectedRoute>
-              <RoleBasedRoute allowedRoles={['admin']}>
-                <AdminDashboard />
-              </RoleBasedRoute>
+              <AppContent />
             </ProtectedRoute>
           }
         />
-        
-        {/* Protected routes - Accounts */}
-        <Route
-          path={ROUTES.ACCOUNTS_DASHBOARD}
-          element={
-            <ProtectedRoute>
-              <RoleBasedRoute allowedRoles={['admin', 'accounts']}>
-                <AccountsDashboard />
-              </RoleBasedRoute>
-            </ProtectedRoute>
-          }
-        />
-        
-        {/* Protected routes - Clearance Manager */}
-        <Route
-          path={ROUTES.CLEARANCE_DASHBOARD}
-          element={
-            <ProtectedRoute>
-              <RoleBasedRoute allowedRoles={['admin', 'clearance_manager']}>
-                <ClearanceDashboard />
-              </RoleBasedRoute>
-            </ProtectedRoute>
-          }
-        />
-        
+
         {/* Default redirect */}
         <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
-        <Route path="*" element={<Navigate to={ROUTES.LOGIN} replace />} />
       </Routes>
     </BrowserRouter>
   );

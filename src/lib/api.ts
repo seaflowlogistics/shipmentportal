@@ -144,4 +144,91 @@ export const usersApi = {
     },
 };
 
+// Shipments API
+export const shipmentsApi = {
+    list: async (params?: {
+        status?: string;
+        mode?: string;
+        search?: string;
+        limit?: number;
+        offset?: number;
+    }): Promise<any> => {
+        const response = await api.get('/shipments', { params });
+        return response.data;
+    },
+
+    get: async (id: string): Promise<any> => {
+        const response = await api.get(`/shipments/${id}`);
+        return response.data;
+    },
+
+    create: async (data: any): Promise<any> => {
+        const response = await api.post('/shipments', data);
+        return response.data;
+    },
+
+    update: async (id: string, data: any): Promise<any> => {
+        const response = await api.put(`/shipments/${id}`, data);
+        return response.data;
+    },
+
+    delete: async (id: string): Promise<{ message: string }> => {
+        const response = await api.delete(`/shipments/${id}`);
+        return response.data;
+    },
+
+    getStatistics: async (): Promise<any> => {
+        const response = await api.get('/shipments/stats/dashboard');
+        return response.data;
+    },
+
+    approve: async (id: string): Promise<any> => {
+        const response = await api.post(`/shipments/${id}/approve`);
+        return response.data;
+    },
+
+    reject: async (id: string, data: { reason: string }): Promise<any> => {
+        const response = await api.post(`/shipments/${id}/reject`, data);
+        return response.data;
+    },
+
+    requestChanges: async (id: string, data: { message?: string }): Promise<any> => {
+        const response = await api.post(`/shipments/${id}/request-changes`, data);
+        return response.data;
+    },
+};
+
+// Documents API
+export const documentsApi = {
+    upload: async (shipmentId: string, file: File, documentType: string): Promise<any> => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('document_type', documentType);
+
+        const response = await api.post(`/documents/${shipmentId}/upload`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    },
+
+    get: async (shipmentId: string): Promise<any> => {
+        const response = await api.get(`/documents/${shipmentId}`);
+        return response.data;
+    },
+
+    delete: async (documentId: string): Promise<{ message: string }> => {
+        const response = await api.delete(`/documents/${documentId}`);
+        return response.data;
+    },
+
+    download: async (documentId: string): Promise<any> => {
+        const response = await api.get(`/documents/${documentId}/download`, {
+            responseType: 'blob',
+        });
+        return response.data;
+    },
+};
+
 export default api;
