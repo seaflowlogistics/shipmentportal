@@ -131,7 +131,7 @@ class EmailService {
             </div>
             
             <div style="text-align: center;">
-              <a href="${process.env.FRONTEND_URL}/shipment/${shipment.id}" class="button">
+              <a href="${process.env.FRONTEND_URL}/shipment/${shipment.id}" class="button" style="color: #ffffff !important;">
                 Review Shipment
               </a>
             </div>
@@ -187,7 +187,7 @@ class EmailService {
             </div>
             
             <div style="text-align: center;">
-              <a href="${process.env.FRONTEND_URL}/shipment/${shipment.id}" class="button">
+              <a href="${process.env.FRONTEND_URL}/shipment/${shipment.id}" class="button" style="color: #ffffff !important;">
                 View Shipment Details
               </a>
             </div>
@@ -252,7 +252,7 @@ class EmailService {
             </div>
             
             <div style="text-align: center;">
-              <a href="${process.env.FRONTEND_URL}/shipment/${shipment.id}" class="button">
+              <a href="${process.env.FRONTEND_URL}/shipment/${shipment.id}" class="button" style="color: #ffffff !important;">
                 View Shipment Details
               </a>
             </div>
@@ -317,7 +317,7 @@ class EmailService {
             </div>
             
             <div style="text-align: center;">
-              <a href="${process.env.FRONTEND_URL}/edit-shipment/${shipment.id}" class="button">
+              <a href="${process.env.FRONTEND_URL}/edit-shipment/${shipment.id}" class="button" style="color: #ffffff !important;">
                 Edit Shipment
               </a>
             </div>
@@ -368,7 +368,7 @@ class EmailService {
             <p>We received a request to reset your password for your Shipment Portal account.</p>
             
             <div style="text-align: center;">
-              <a href="${resetLink}" class="button">
+              <a href="${resetLink}" class="button" style="color: #ffffff !important;">
                 Reset Password
               </a>
             </div>

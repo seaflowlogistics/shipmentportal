@@ -33,6 +33,22 @@ export interface Shipment {
     last_updated_by?: string;
     created_at: Date;
     updated_at: Date;
+    // New fields
+    invoice_no?: string;
+    invoice_item_count?: number;
+    customs_r_form?: string;
+    bl_awb_no?: string;
+    container_no?: string;
+    container_type?: string;
+    cbm?: number;
+    gross_weight?: number;
+    package_count?: string;
+    cleared_date?: Date;
+    expense_macl?: number;
+    expense_mpl?: number;
+    expense_mcs?: number;
+    expense_transportation?: number;
+    expense_liner?: number;
 }
 
 export interface CreateShipmentData {
@@ -61,6 +77,22 @@ export interface CreateShipmentData {
     expected_delivery_date: Date;
     mode_of_transport: 'air' | 'sea' | 'road';
     created_by: string;
+    // New fields
+    invoice_no?: string;
+    invoice_item_count?: number;
+    customs_r_form?: string;
+    bl_awb_no?: string;
+    container_no?: string;
+    container_type?: string;
+    cbm?: number;
+    gross_weight?: number;
+    package_count?: string;
+    cleared_date?: Date;
+    expense_macl?: number;
+    expense_mpl?: number;
+    expense_mcs?: number;
+    expense_transportation?: number;
+    expense_liner?: number;
 }
 
 export interface UpdateShipmentData {
@@ -91,6 +123,22 @@ export interface UpdateShipmentData {
     status?: string;
     rejection_reason?: string;
     last_updated_by?: string;
+    // New fields
+    invoice_no?: string;
+    invoice_item_count?: number;
+    customs_r_form?: string;
+    bl_awb_no?: string;
+    container_no?: string;
+    container_type?: string;
+    cbm?: number;
+    gross_weight?: number;
+    package_count?: string;
+    cleared_date?: Date;
+    expense_macl?: number;
+    expense_mpl?: number;
+    expense_mcs?: number;
+    expense_transportation?: number;
+    expense_liner?: number;
 }
 
 export class ShipmentModel {
@@ -126,10 +174,14 @@ export class ShipmentModel {
                 receiver_name, receiver_address, receiver_contact, receiver_email,
                 item_description, weight, weight_unit, dimensions_length, dimensions_width, dimensions_height,
                 dimensions_unit, value, currency, pickup_date, expected_delivery_date, mode_of_transport,
-                created_by, status
+                created_by, status,
+                invoice_no, invoice_item_count, customs_r_form, bl_awb_no, container_no, container_type,
+                cbm, gross_weight, package_count, cleared_date,
+                expense_macl, expense_mpl, expense_mcs, expense_transportation, expense_liner
             ) VALUES (
                 $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19,
-                $20, $21, $22, $23, $24, $25, $26, $27
+                $20, $21, $22, $23, $24, $25, $26, $27,
+                $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42
             ) RETURNING *`,
             [
                 shipmentId,
@@ -158,7 +210,22 @@ export class ShipmentModel {
                 data.expected_delivery_date,
                 data.mode_of_transport,
                 data.created_by,
-                'created'
+                'created',
+                data.invoice_no || null,
+                data.invoice_item_count || null,
+                data.customs_r_form || null,
+                data.bl_awb_no || null,
+                data.container_no || null,
+                data.container_type || null,
+                data.cbm || null,
+                data.gross_weight || null,
+                data.package_count || null,
+                data.cleared_date || null,
+                data.expense_macl || null,
+                data.expense_mpl || null,
+                data.expense_mcs || null,
+                data.expense_transportation || null,
+                data.expense_liner || null
             ]
         );
         return result.rows[0];
@@ -196,7 +263,22 @@ export class ShipmentModel {
             'mode_of_transport',
             'status',
             'rejection_reason',
-            'last_updated_by'
+            'last_updated_by',
+            'invoice_no',
+            'invoice_item_count',
+            'customs_r_form',
+            'bl_awb_no',
+            'container_no',
+            'container_type',
+            'cbm',
+            'gross_weight',
+            'package_count',
+            'cleared_date',
+            'expense_macl',
+            'expense_mpl',
+            'expense_mcs',
+            'expense_transportation',
+            'expense_liner'
         ];
 
         for (const field of updateFields) {

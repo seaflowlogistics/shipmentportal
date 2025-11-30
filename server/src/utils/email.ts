@@ -1,15 +1,27 @@
 import { emailConfig, appConfig } from '../config/auth';
 
-let transporter: any = null;
+import nodemailer from 'nodemailer';
+
+let transporter: nodemailer.Transporter | null = null;
+
 try {
-  const nodemailer = require('nodemailer');
-  transporter = nodemailer.createTransporter(emailConfig.smtp);
-  console.log(`✅ Email transporter initialized`);
-  console.log(`   Host: ${emailConfig.smtp.host}:${emailConfig.smtp.port}`);
-  console.log(`   From: ${emailConfig.fromName} <${emailConfig.from}>`);
-  console.log(`   TLS: ${emailConfig.smtp.secure ? 'TLS/SSL' : 'STARTTLS'}`);
+  if (emailConfig.smtp.host && emailConfig.smtp.auth.user && emailConfig.smtp.auth.pass) {
+    transporter = nodemailer.createTransport({
+      host: emailConfig.smtp.host,
+      port: emailConfig.smtp.port,
+      secure: emailConfig.smtp.secure,
+      auth: {
+        user: emailConfig.smtp.auth.user,
+        pass: emailConfig.smtp.auth.pass,
+      },
+    });
+    console.log(`✅ Email transporter initialized`);
+    console.log(`   Host: ${emailConfig.smtp.host}:${emailConfig.smtp.port}`);
+  } else {
+    console.warn('⚠️  Email configuration missing - check .env file');
+  }
 } catch (error) {
-  console.warn('⚠️  Email functionality disabled - nodemailer not available');
+  console.error('❌ Failed to initialize email transporter:', error);
 }
 
 export interface EmailOptions {
@@ -76,7 +88,7 @@ export const sendWelcomeEmail = async (
           
           <p><strong>Important:</strong> You will be required to change your password upon first login for security reasons.</p>
           
-          <a href="${appConfig.frontendUrl}/login" class="button">Login to Portal</a>
+          <a href="${appConfig.frontendUrl}/login" class="button" style="color: #ffffff !important;">Login to Portal</a>
           
           <p>If you have any questions, please contact your administrator.</p>
         </div>
@@ -127,7 +139,7 @@ export const sendPasswordResetEmail = async (
           <h2>Hello ${username},</h2>
           <p>We received a request to reset your password for your Shipment Portal account.</p>
           
-          <a href="${resetUrl}" class="button">Reset Password</a>
+          <a href="${resetUrl}" class="button" style="color: #ffffff !important;">Reset Password</a>
           
           <p>Or copy and paste this link into your browser:</p>
           <p style="word-break: break-all; color: #4F46E5;">${resetUrl}</p>

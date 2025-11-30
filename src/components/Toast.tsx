@@ -89,7 +89,7 @@ export const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration =
 };
 
 interface ToastContainerProps {
-  toasts: Array<ToastProps & { id: string }>;
+  toasts: Array<Omit<ToastProps, 'onClose'> & { id: string }>;
   removeToast: (id: string) => void;
 }
 

@@ -71,14 +71,6 @@ export const AdminDashboard: React.FC = () => {
     return 'info';
   };
 
-  const getStatusIcon = (status: string) => {
-    if (status === 'approved') return <CheckCircleIcon className="h-5 w-5" />;
-    if (status === 'rejected') return <XCircleIcon className="h-5 w-5" />;
-    if (status === 'in_transit') return <ArrowPathIcon className="h-5 w-5" />;
-    if (status === 'delivered') return <DocumentArrowDownIcon className="h-5 w-5" />;
-    return null;
-  };
-
   if (loading) {
     return <Loading fullScreen message="Loading dashboard..." />;
   }
@@ -226,7 +218,7 @@ export const AdminDashboard: React.FC = () => {
                       <TableCell>{shipment.exporter_name}</TableCell>
                       <TableCell>{shipment.receiver_name}</TableCell>
                       <TableCell>
-                        {shipment.currency} {shipment.value.toFixed(2)}
+                        {shipment.currency} {Number(shipment.value).toFixed(2)}
                       </TableCell>
                       <TableCell className="capitalize">{shipment.mode_of_transport}</TableCell>
                       <TableCell>{formatDate(shipment.pickup_date)}</TableCell>
