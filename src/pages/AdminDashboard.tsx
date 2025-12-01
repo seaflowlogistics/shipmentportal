@@ -15,6 +15,7 @@ import {
   Loading,
   EmptyState,
   ToastContainer,
+  ProgressModal,
 } from '../components';
 import { useToast } from '../hooks/useToast';
 import {
@@ -34,6 +35,8 @@ export const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<any>(null);
   const [recentShipments, setRecentShipments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exportProgress, setExportProgress] = useState(0);
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -65,40 +68,66 @@ export const AdminDashboard: React.FC = () => {
     return 'info';
   };
 
-  const handleExportDashboard = (format: 'excel' | 'pdf') => {
-    const stats = { ...stats };
-    const exportData = [
-      {
-        'Metric': 'Total Shipments',
-        'Count': stats?.total || 0
-      },
-      {
-        'Metric': 'Pending Approval',
-        'Count': stats?.pending_approval || 0
-      },
-      {
-        'Metric': 'Approved',
-        'Count': stats?.approved || 0
-      },
-      {
-        'Metric': 'Rejected',
-        'Count': stats?.rejected || 0
-      },
-      {
-        'Metric': 'In Transit',
-        'Count': stats?.in_transit || 0
-      },
-      {
-        'Metric': 'Delivered',
-        'Count': stats?.delivered || 0
-      }
-    ];
+  const handleExportDashboard = async (format: 'excel' | 'pdf') => {
+    setIsExporting(true);
+    setExportProgress(0);
 
-    const filename = `admin-dashboard-${new Date().toISOString().split('T')[0]}`;
-    if (format === 'excel') {
-      exportToExcel(exportData, filename, 'Dashboard');
-    } else {
-      exportToPDF(exportData, filename, 'Admin Dashboard Report');
+    try {
+      // Simulate progress for UX feedback
+      const progressInterval = setInterval(() => {
+        setExportProgress((prev) => {
+          if (prev >= 90) return prev;
+          return prev + Math.random() * 30;
+        });
+      }, 300);
+
+      const stats = { ...stats };
+      const exportData = [
+        {
+          'Metric': 'Total Shipments',
+          'Count': stats?.total || 0
+        },
+        {
+          'Metric': 'Pending Approval',
+          'Count': stats?.pending_approval || 0
+        },
+        {
+          'Metric': 'Approved',
+          'Count': stats?.approved || 0
+        },
+        {
+          'Metric': 'Rejected',
+          'Count': stats?.rejected || 0
+        },
+        {
+          'Metric': 'In Transit',
+          'Count': stats?.in_transit || 0
+        },
+        {
+          'Metric': 'Delivered',
+          'Count': stats?.delivered || 0
+        }
+      ];
+
+      const filename = `admin-dashboard-${new Date().toISOString().split('T')[0]}`;
+      if (format === 'excel') {
+        exportToExcel(exportData, filename, 'Dashboard');
+      } else {
+        exportToPDF(exportData, filename, 'Admin Dashboard Report');
+      }
+
+      clearInterval(progressInterval);
+      setExportProgress(100);
+
+      // Close modal after brief delay
+      setTimeout(() => {
+        setIsExporting(false);
+        setExportProgress(0);
+      }, 500);
+    } catch (error) {
+      console.error('Export error:', error);
+      setIsExporting(false);
+      setExportProgress(0);
     }
   };
 
@@ -119,21 +148,37 @@ export const AdminDashboard: React.FC = () => {
             size="sm"
             leftIcon={<DocumentArrowDownIcon className="w-4 h-4" />}
             onClick={() => handleExportDashboard('excel')}
+            isLoading={isExporting}
+            disabled={isExporting}
           >
-            Export Excel
+            Excel
           </Button>
           <Button
             variant="secondary"
             size="sm"
             leftIcon={<DocumentArrowDownIcon className="w-4 h-4" />}
             onClick={() => handleExportDashboard('pdf')}
+            isLoading={isExporting}
+            disabled={isExporting}
           >
-            Export PDF
+            PDF
           </Button>
-          <Button leftIcon={<DocumentPlusIcon className="w-4 h-4" />} onClick={() => navigate('/create-shipment')}>
+          <Button
+            leftIcon={<DocumentPlusIcon className="w-4 h-4" />}
+            onClick={() => navigate('/create-shipment')}
+            disabled={isExporting}
+          >
             Create Shipment
           </Button>
         </div>
+
+        <ProgressModal
+          isOpen={isExporting}
+          title="Exporting Dashboard"
+          message="Preparing your dashboard report..."
+          progress={exportProgress}
+          showProgress={true}
+        />
       </div>
 
       {/* Stats Grid */}

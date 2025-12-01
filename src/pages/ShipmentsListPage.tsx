@@ -15,6 +15,8 @@ import {
   Loading,
   EmptyState,
   ToastContainer,
+  SkeletonTable,
+  ProgressModal,
 } from '../components';
 import { useToast } from '../hooks/useToast';
 import { DocumentArrowDownIcon, DocumentPlusIcon, EyeIcon, PencilIcon } from '@heroicons/react/24/outline';
@@ -37,6 +39,8 @@ export const ShipmentsListPage: React.FC = () => {
     offset: 0,
     pages: 0,
   });
+  const [exportProgress, setExportProgress] = useState(0);
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     fetchShipments();
@@ -74,23 +78,49 @@ export const ShipmentsListPage: React.FC = () => {
     return 'info';
   };
 
-  const handleExport = (format: 'csv' | 'json' | 'excel' | 'pdf') => {
-    const exportData = prepareShipmentsForExport(shipments);
-    const filename = `shipments-${new Date().toISOString().split('T')[0]}`;
+  const handleExport = async (format: 'csv' | 'json' | 'excel' | 'pdf') => {
+    setIsExporting(true);
+    setExportProgress(0);
 
-    switch (format) {
-      case 'csv':
-        exportToCSV(exportData, filename);
-        break;
-      case 'json':
-        exportToJSON(shipments, filename);
-        break;
-      case 'excel':
-        exportToExcel(exportData, filename, 'Shipments');
-        break;
-      case 'pdf':
-        exportToPDF(exportData, filename, 'Shipments Report');
-        break;
+    try {
+      // Simulate progress for UX feedback
+      const progressInterval = setInterval(() => {
+        setExportProgress((prev) => {
+          if (prev >= 90) return prev;
+          return prev + Math.random() * 30;
+        });
+      }, 300);
+
+      const exportData = prepareShipmentsForExport(shipments);
+      const filename = `shipments-${new Date().toISOString().split('T')[0]}`;
+
+      switch (format) {
+        case 'csv':
+          exportToCSV(exportData, filename);
+          break;
+        case 'json':
+          exportToJSON(shipments, filename);
+          break;
+        case 'excel':
+          exportToExcel(exportData, filename, 'Shipments');
+          break;
+        case 'pdf':
+          exportToPDF(exportData, filename, 'Shipments Report');
+          break;
+      }
+
+      clearInterval(progressInterval);
+      setExportProgress(100);
+
+      // Close modal after brief delay
+      setTimeout(() => {
+        setIsExporting(false);
+        setExportProgress(0);
+      }, 500);
+    } catch (error) {
+      console.error('Export error:', error);
+      setIsExporting(false);
+      setExportProgress(0);
     }
   };
 
@@ -112,6 +142,8 @@ export const ShipmentsListPage: React.FC = () => {
             leftIcon={<DocumentArrowDownIcon className="w-4 h-4" />}
             onClick={() => handleExport('excel')}
             title="Export to Excel"
+            isLoading={isExporting}
+            disabled={isExporting}
           >
             Excel
           </Button>
@@ -121,6 +153,8 @@ export const ShipmentsListPage: React.FC = () => {
             leftIcon={<DocumentArrowDownIcon className="w-4 h-4" />}
             onClick={() => handleExport('pdf')}
             title="Export to PDF"
+            isLoading={isExporting}
+            disabled={isExporting}
           >
             PDF
           </Button>
@@ -130,16 +164,27 @@ export const ShipmentsListPage: React.FC = () => {
             leftIcon={<DocumentArrowDownIcon className="w-4 h-4" />}
             onClick={() => handleExport('csv')}
             title="Export to CSV"
+            isLoading={isExporting}
+            disabled={isExporting}
           >
             CSV
           </Button>
           <Button
             leftIcon={<DocumentPlusIcon className="w-4 h-4" />}
             onClick={() => navigate('/create-shipment')}
+            disabled={isExporting}
           >
             Create Shipment
           </Button>
         </div>
+
+        <ProgressModal
+          isOpen={isExporting}
+          title="Exporting Shipments"
+          message="Preparing your export file..."
+          progress={exportProgress}
+          showProgress={true}
+        />
       </div>
 
       {/* Filter Section */}
