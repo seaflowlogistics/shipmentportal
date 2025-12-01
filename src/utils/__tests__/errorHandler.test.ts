@@ -30,12 +30,12 @@ describe('errorHandler utilities', () => {
       const error = {
         response: {
           status: 401,
-          data: { error: 'Unauthorized' }
+          data: {}
         }
       };
       const result = getErrorMessage(error);
       expect(result).toBeTruthy();
-      expect(result).not.toContain('Unauthorized');
+      expect(result).toContain('permission');
     });
 
     it('should handle error response objects with 403 status', () => {

@@ -72,6 +72,10 @@ export const getErrorMessage = (error: any): string => {
     return ERROR_MESSAGES[error] || error;
   }
 
+  if (!error) {
+    return ERROR_MESSAGES.SERVER_ERROR;
+  }
+
   // Handle axios/fetch error responses
   if (error.response) {
     const status = error.response.status;

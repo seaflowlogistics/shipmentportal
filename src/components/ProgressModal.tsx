@@ -25,7 +25,6 @@ export const ProgressModal: React.FC<ProgressModalProps> = ({
       isOpen={isOpen}
       title={title}
       onClose={onClose}
-      closeButton={false}
       size="sm"
     >
       <div className="space-y-4">
