@@ -22,6 +22,7 @@ import {
 } from '../components';
 import { useToast } from '../hooks/useToast';
 import { ArrowLeftIcon, TrashIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { formatDate } from '../utils/dateFormat';
 
 export const ShipmentDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -132,10 +133,6 @@ export const ShipmentDetailPage: React.FC = () => {
         } catch (err: any) {
             showError(err.response?.data?.error || 'Failed to download document');
         }
-    };
-
-    const formatDate = (date: string) => {
-        return new Date(date).toLocaleDateString();
     };
 
     const canEdit = shipment?.created_by === user?.id && ['new', 'created', 'changes_requested'].includes(shipment?.status);

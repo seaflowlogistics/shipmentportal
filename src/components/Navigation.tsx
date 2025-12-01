@@ -52,7 +52,7 @@ export const Navigation: React.FC = () => {
                             Shipments
                         </button>
 
-                        {(user?.role === 'clearance_manager' || user?.role === 'admin') && (
+                        {(user?.role === 'clearance_agent' || user?.role === 'admin') && (
                             <button
                                 onClick={() => navigate('/create-shipment')}
                                 className={`nav-link ${isActive('/create-shipment') ? 'active' : ''}`}

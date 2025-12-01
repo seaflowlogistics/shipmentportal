@@ -90,7 +90,7 @@ describe('RBAC - Shipment Access', () => {
         expect(Array.isArray(response.body.shipments)).toBe(true);
     });
 
-    test('ClearanceManager can only view own shipments', async () => {
+    test('ClearanceAgent can only view own shipments', async () => {
         // Create shipment by another user
         await request(app)
             .post('/api/shipments')
@@ -116,7 +116,7 @@ describe('RBAC - Shipment Access', () => {
             .set('Authorization', `Bearer ${clearanceToken}`);
 
         expect(response.status).toBe(200);
-        // Should be empty since ClearanceManager created none
+        // Should be empty since ClearanceAgent created none
         expect(response.body.shipments.length).toBe(0);
     });
 });
@@ -146,7 +146,7 @@ describe('RBAC - Shipment Creation', () => {
         expect(response.body.shipment).toHaveProperty('shipment_id');
     });
 
-    test('ClearanceManager can create shipments', async () => {
+    test('ClearanceAgent can create shipments', async () => {
         const response = await request(app)
             .post('/api/shipments')
             .set('Authorization', `Bearer ${clearanceToken}`)
@@ -254,7 +254,7 @@ describe('RBAC - Approval Actions', () => {
         expect(response.status).toBe(403);
     });
 
-    test('ClearanceManager CANNOT approve shipments', async () => {
+    test('ClearanceAgent CANNOT approve shipments', async () => {
         const response = await request(app)
             .post(`/api/shipments/${shipmentId}/approve`)
             .set('Authorization', `Bearer ${clearanceToken}`);
@@ -317,7 +317,7 @@ describe('RBAC - User Management', () => {
         expect(response.status).toBe(403);
     });
 
-    test('ClearanceManager CANNOT create users', async () => {
+    test('ClearanceAgent CANNOT create users', async () => {
         const response = await request(app)
             .post('/api/users')
             .set('Authorization', `Bearer ${clearanceToken}`)
@@ -350,7 +350,7 @@ describe('RBAC - Audit Logs', () => {
         expect(response.status).toBe(403);
     });
 
-    test('ClearanceManager CANNOT view audit logs', async () => {
+    test('ClearanceAgent CANNOT view audit logs', async () => {
         const response = await request(app)
             .get('/api/audit-logs')
             .set('Authorization', `Bearer ${clearanceToken}`);

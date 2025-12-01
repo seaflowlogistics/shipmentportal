@@ -18,6 +18,7 @@ import {
 } from '../components';
 import { useToast } from '../hooks/useToast';
 import { ClipboardDocumentListIcon, CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { formatDate } from '../utils/dateFormat';
 
 export const AccountsDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -50,13 +51,6 @@ export const AccountsDashboard: React.FC = () => {
     }
   };
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
 
   const formatNumber = (num: number) => {
     return num || 0;

@@ -1,6 +1,7 @@
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { formatDate, formatDateTime } from './dateFormat';
 
 // CSV Export (already exists)
 export const exportToCSV = (data: any[], filename: string) => {
@@ -130,17 +131,17 @@ export const prepareShipmentsForExport = (shipments: any[]) => {
         'Weight': `${s.weight} ${s.weight_unit}`,
         'Value': `${s.currency} ${s.value}`,
         'Mode': s.mode_of_transport.toUpperCase(),
-        'Pickup Date': new Date(s.pickup_date).toLocaleDateString(),
-        'Delivery Date': new Date(s.expected_delivery_date).toLocaleDateString(),
+        'Pickup Date': formatDate(s.pickup_date),
+        'Delivery Date': formatDate(s.expected_delivery_date),
         'Status': s.status.replace(/_/g, ' ').toUpperCase(),
-        'Created': new Date(s.created_at).toLocaleString()
+        'Created': formatDateTime(s.created_at)
     }));
 };
 
 // Audit logs export helper (NEW)
 export const prepareAuditLogsForExport = (logs: any[]) => {
     return logs.map(log => ({
-        'Timestamp': new Date(log.timestamp).toLocaleString(),
+        'Timestamp': formatDateTime(log.created_at || log.timestamp),
         'User': log.username || 'System',
         'Action': log.action.replace(/_/g, ' '),
         'Entity Type': log.entity_type || 'N/A',

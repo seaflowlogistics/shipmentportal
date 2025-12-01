@@ -15,10 +15,13 @@ import {
   Loading,
   EmptyState,
   ToastContainer,
+  SkeletonTable,
+  ProgressModal,
 } from '../components';
 import { useToast } from '../hooks/useToast';
 import { DocumentArrowDownIcon, DocumentPlusIcon, EyeIcon, PencilIcon } from '@heroicons/react/24/outline';
-import { exportToCSV, exportToJSON, prepareShipmentsForExport } from '../utils/export';
+import { exportToCSV, exportToJSON, exportToExcel, exportToPDF, prepareShipmentsForExport } from '../utils/export';
+import { formatDate } from '../utils/dateFormat';
 
 export const ShipmentsListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -36,6 +39,8 @@ export const ShipmentsListPage: React.FC = () => {
     offset: 0,
     pages: 0,
   });
+  const [exportProgress, setExportProgress] = useState(0);
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     fetchShipments();
@@ -73,17 +78,49 @@ export const ShipmentsListPage: React.FC = () => {
     return 'info';
   };
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString();
-  };
+  const handleExport = async (format: 'csv' | 'json' | 'excel' | 'pdf') => {
+    setIsExporting(true);
+    setExportProgress(0);
 
-  const handleExport = (format: 'csv' | 'json') => {
-    const exportData = prepareShipmentsForExport(shipments);
+    try {
+      // Simulate progress for UX feedback
+      const progressInterval = setInterval(() => {
+        setExportProgress((prev) => {
+          if (prev >= 90) return prev;
+          return prev + Math.random() * 30;
+        });
+      }, 300);
 
-    if (format === 'csv') {
-      exportToCSV(exportData, 'shipments');
-    } else {
-      exportToJSON(shipments, 'shipments');
+      const exportData = prepareShipmentsForExport(shipments);
+      const filename = `shipments-${new Date().toISOString().split('T')[0]}`;
+
+      switch (format) {
+        case 'csv':
+          exportToCSV(exportData, filename);
+          break;
+        case 'json':
+          exportToJSON(shipments, filename);
+          break;
+        case 'excel':
+          exportToExcel(exportData, filename, 'Shipments');
+          break;
+        case 'pdf':
+          exportToPDF(exportData, filename, 'Shipments Report');
+          break;
+      }
+
+      clearInterval(progressInterval);
+      setExportProgress(100);
+
+      // Close modal after brief delay
+      setTimeout(() => {
+        setIsExporting(false);
+        setExportProgress(0);
+      }, 500);
+    } catch (error) {
+      console.error('Export error:', error);
+      setIsExporting(false);
+      setExportProgress(0);
     }
   };
 
@@ -98,30 +135,56 @@ export const ShipmentsListPage: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Shipments</h1>
           <p className="text-gray-600 mt-2">Manage and track all shipments</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            leftIcon={<DocumentArrowDownIcon className="w-4 h-4" />}
+            onClick={() => handleExport('excel')}
+            title="Export to Excel"
+            isLoading={isExporting}
+            disabled={isExporting}
+          >
+            Excel
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            leftIcon={<DocumentArrowDownIcon className="w-4 h-4" />}
+            onClick={() => handleExport('pdf')}
+            title="Export to PDF"
+            isLoading={isExporting}
+            disabled={isExporting}
+          >
+            PDF
+          </Button>
           <Button
             variant="secondary"
             size="sm"
             leftIcon={<DocumentArrowDownIcon className="w-4 h-4" />}
             onClick={() => handleExport('csv')}
+            title="Export to CSV"
+            isLoading={isExporting}
+            disabled={isExporting}
           >
             CSV
           </Button>
           <Button
-            variant="secondary"
-            size="sm"
-            leftIcon={<DocumentArrowDownIcon className="w-4 h-4" />}
-            onClick={() => handleExport('json')}
-          >
-            JSON
-          </Button>
-          <Button
             leftIcon={<DocumentPlusIcon className="w-4 h-4" />}
             onClick={() => navigate('/create-shipment')}
+            disabled={isExporting}
           >
             Create Shipment
           </Button>
         </div>
+
+        <ProgressModal
+          isOpen={isExporting}
+          title="Exporting Shipments"
+          message="Preparing your export file..."
+          progress={exportProgress}
+          showProgress={true}
+        />
       </div>
 
       {/* Filter Section */}

@@ -19,6 +19,7 @@ import {
 import { useToast } from '../hooks/useToast';
 import { FunnelIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { exportToExcel, exportToPDF, prepareAuditLogsForExport } from '../utils/export';
+import { formatDateTime } from '../utils/dateFormat';
 
 interface AuditLog {
   id: string;
@@ -73,16 +74,6 @@ export const AdminAuditLogsPage: React.FC = () => {
     return true;
   });
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    });
-  };
 
   const handleExportExcel = () => {
     const exportData = prepareAuditLogsForExport(filteredLogs);
@@ -203,7 +194,7 @@ export const AdminAuditLogsPage: React.FC = () => {
             <TableBody>
               {filteredLogs.map((log) => (
                 <TableRow key={log.id}>
-                  <TableCell className="text-sm">{formatDate(log.created_at)}</TableCell>
+                  <TableCell className="text-sm">{formatDateTime(log.created_at)}</TableCell>
                   <TableCell>
                     <Badge variant={getActionBadgeVariant(log.action)} size="sm">
                       {log.action}

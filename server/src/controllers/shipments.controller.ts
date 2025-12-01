@@ -317,14 +317,24 @@ export const listShipments = async (req: AuthRequest, res: Response): Promise<vo
 export const getStatistics = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         let userId = undefined;
+        const { dateFrom, dateTo } = req.query;
 
-        // ClearanceManager gets only their statistics
-        if (req.user!.role === 'clearance_manager') {
+        // ClearanceAgent gets only their statistics
+        if (req.user!.role === 'clearance_agent') {
             userId = req.user!.id || req.user!.userId;
         }
 
-        const stats = await ShipmentModel.getStatistics(userId);
-        const recentShipments = await ShipmentModel.getRecentShipments(5, userId);
+        const stats = await ShipmentModel.getStatistics(
+            userId,
+            dateFrom ? String(dateFrom) : undefined,
+            dateTo ? String(dateTo) : undefined
+        );
+        const recentShipments = await ShipmentModel.getRecentShipments(
+            5,
+            userId,
+            dateFrom ? String(dateFrom) : undefined,
+            dateTo ? String(dateTo) : undefined
+        );
 
         res.json({
             statistics: stats,

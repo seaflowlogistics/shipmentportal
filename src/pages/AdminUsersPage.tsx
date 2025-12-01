@@ -20,6 +20,7 @@ import {
 } from '../components';
 import { useToast } from '../hooks/useToast';
 import { TrashIcon, KeyIcon, PlusIcon, DocumentMinusIcon } from '@heroicons/react/24/outline';
+import { formatDate } from '../utils/dateFormat';
 
 export const AdminUsersPage: React.FC = () => {
   const { toasts, removeToast, success, error: showError } = useToast();
@@ -43,7 +44,7 @@ export const AdminUsersPage: React.FC = () => {
     username: '',
     email: '',
     full_name: '',
-    role: 'clearance_manager',
+    role: 'clearance_agent',
   });
 
   useEffect(() => {
@@ -87,7 +88,7 @@ export const AdminUsersPage: React.FC = () => {
         username: '',
         email: '',
         full_name: '',
-        role: 'clearance_manager',
+        role: 'clearance_agent',
       });
       fetchUsers();
     } catch (err: any) {
@@ -191,7 +192,7 @@ export const AdminUsersPage: React.FC = () => {
             { value: '', label: 'All Roles' },
             { value: 'admin', label: 'Admin' },
             { value: 'accounts', label: 'Accounts Manager' },
-            { value: 'clearance_manager', label: 'Clearance Manager' },
+            { value: 'clearance_agent', label: 'Clearance Agent' },
           ]}
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value)}
@@ -231,7 +232,7 @@ export const AdminUsersPage: React.FC = () => {
                     {user.is_active ? 'Active' : 'Inactive'}
                   </Badge>
                 </TableCell>
-                <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
+                <TableCell>{formatDate(user.created_at)}</TableCell>
                 <TableCell align="center">
                   <div className="flex items-center justify-center gap-2">
                     <Button
@@ -305,7 +306,7 @@ export const AdminUsersPage: React.FC = () => {
           <Select
             label="Role"
             options={[
-              { value: 'clearance_manager', label: 'Clearance Manager' },
+              { value: 'clearance_agent', label: 'Clearance Agent' },
               { value: 'accounts', label: 'Accounts Manager' },
               { value: 'admin', label: 'Admin' },
             ]}
