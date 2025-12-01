@@ -16,7 +16,7 @@ export const Card: React.FC<CardProps> = ({
   return (
     <div
       onClick={onClick}
-      className={`bg-white rounded-lg border border-gray-200 shadow-sm ${
+      className={`bg-white rounded-lg border border-slate-200 shadow-sm ${
         hoverable ? 'hover:shadow-md transition-shadow cursor-pointer' : ''
       } ${className}`}
     >
@@ -35,7 +35,7 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
   className = '',
 }) => {
   return (
-    <div className={`px-6 py-4 border-b border-gray-200 ${className}`}>
+    <div className={`px-6 py-4 border-b border-slate-100 ${className}`}>
       {children}
     </div>
   );
@@ -63,7 +63,7 @@ export const CardFooter: React.FC<CardFooterProps> = ({
   className = '',
 }) => {
   return (
-    <div className={`px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-lg ${className}`}>
+    <div className={`px-6 py-4 bg-slate-50 border-t border-slate-100 rounded-b-lg ${className}`}>
       {children}
     </div>
   );

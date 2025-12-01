@@ -81,31 +81,31 @@ export const AdminDashboard: React.FC = () => {
         });
       }, 300);
 
-      const stats = { ...stats };
+      const currentStats = { ...stats };
       const exportData = [
         {
           'Metric': 'Total Shipments',
-          'Count': stats?.total || 0
+          'Count': currentStats?.total || 0
         },
         {
           'Metric': 'Pending Approval',
-          'Count': stats?.pending_approval || 0
+          'Count': currentStats?.pending_approval || 0
         },
         {
           'Metric': 'Approved',
-          'Count': stats?.approved || 0
+          'Count': currentStats?.approved || 0
         },
         {
           'Metric': 'Rejected',
-          'Count': stats?.rejected || 0
+          'Count': currentStats?.rejected || 0
         },
         {
           'Metric': 'In Transit',
-          'Count': stats?.in_transit || 0
+          'Count': currentStats?.in_transit || 0
         },
         {
           'Metric': 'Delivered',
-          'Count': stats?.delivered || 0
+          'Count': currentStats?.delivered || 0
         }
       ];
 
@@ -187,14 +187,14 @@ export const AdminDashboard: React.FC = () => {
         <Card hoverable>
           <CardBody className="flex items-center gap-4">
             <div className="flex-shrink-0">
-              <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-blue-100">
-                <DocumentPlusIcon className="h-6 w-6 text-blue-600" />
+              <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-primary-50">
+                <DocumentPlusIcon className="h-6 w-6 text-primary-600" />
               </div>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">Total</p>
-              <p className="text-2xl font-bold text-gray-900">{formatNumber(stats?.total)}</p>
-              <p className="text-xs text-gray-500 mt-1">All time</p>
+              <p className="text-sm font-medium text-slate-500">Total</p>
+              <p className="text-2xl font-bold text-slate-900">{formatNumber(stats?.total)}</p>
+              <p className="text-xs text-slate-400 mt-1">All time</p>
             </div>
           </CardBody>
         </Card>
@@ -203,14 +203,14 @@ export const AdminDashboard: React.FC = () => {
         <Card hoverable>
           <CardBody className="flex items-center gap-4">
             <div className="flex-shrink-0">
-              <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-yellow-100">
+              <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-yellow-50">
                 <ClipboardDocumentListIcon className="h-6 w-6 text-yellow-600" />
               </div>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">Pending</p>
-              <p className="text-2xl font-bold text-gray-900">{formatNumber(stats?.pending_approval)}</p>
-              <p className="text-xs text-gray-500 mt-1">Awaiting review</p>
+              <p className="text-sm font-medium text-slate-500">Pending</p>
+              <p className="text-2xl font-bold text-slate-900">{formatNumber(stats?.pending_approval)}</p>
+              <p className="text-xs text-slate-400 mt-1">Awaiting review</p>
             </div>
           </CardBody>
         </Card>
@@ -219,14 +219,14 @@ export const AdminDashboard: React.FC = () => {
         <Card hoverable>
           <CardBody className="flex items-center gap-4">
             <div className="flex-shrink-0">
-              <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-green-100">
+              <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-green-50">
                 <CheckCircleIcon className="h-6 w-6 text-green-600" />
               </div>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">Approved</p>
-              <p className="text-2xl font-bold text-gray-900">{formatNumber(stats?.approved)}</p>
-              <p className="text-xs text-gray-500 mt-1">Ready to ship</p>
+              <p className="text-sm font-medium text-slate-500">Approved</p>
+              <p className="text-2xl font-bold text-slate-900">{formatNumber(stats?.approved)}</p>
+              <p className="text-xs text-slate-400 mt-1">Ready to ship</p>
             </div>
           </CardBody>
         </Card>
@@ -235,14 +235,14 @@ export const AdminDashboard: React.FC = () => {
         <Card hoverable>
           <CardBody className="flex items-center gap-4">
             <div className="flex-shrink-0">
-              <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-red-100">
+              <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-red-50">
                 <XCircleIcon className="h-6 w-6 text-red-600" />
               </div>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">Rejected</p>
-              <p className="text-2xl font-bold text-gray-900">{formatNumber(stats?.rejected)}</p>
-              <p className="text-xs text-gray-500 mt-1">Needs attention</p>
+              <p className="text-sm font-medium text-slate-500">Rejected</p>
+              <p className="text-2xl font-bold text-slate-900">{formatNumber(stats?.rejected)}</p>
+              <p className="text-xs text-slate-400 mt-1">Needs attention</p>
             </div>
           </CardBody>
         </Card>
@@ -251,14 +251,14 @@ export const AdminDashboard: React.FC = () => {
         <Card hoverable>
           <CardBody className="flex items-center gap-4">
             <div className="flex-shrink-0">
-              <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-purple-100">
+              <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-purple-50">
                 <ArrowPathIcon className="h-6 w-6 text-purple-600" />
               </div>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">In Transit</p>
-              <p className="text-2xl font-bold text-gray-900">{formatNumber(stats?.in_transit)}</p>
-              <p className="text-xs text-gray-500 mt-1">Active shipments</p>
+              <p className="text-sm font-medium text-slate-500">In Transit</p>
+              <p className="text-2xl font-bold text-slate-900">{formatNumber(stats?.in_transit)}</p>
+              <p className="text-xs text-slate-400 mt-1">Active shipments</p>
             </div>
           </CardBody>
         </Card>
@@ -267,14 +267,14 @@ export const AdminDashboard: React.FC = () => {
         <Card hoverable>
           <CardBody className="flex items-center gap-4">
             <div className="flex-shrink-0">
-              <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-teal-100">
+              <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-teal-50">
                 <DocumentArrowDownIcon className="h-6 w-6 text-teal-600" />
               </div>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">Delivered</p>
-              <p className="text-2xl font-bold text-gray-900">{formatNumber(stats?.delivered)}</p>
-              <p className="text-xs text-gray-500 mt-1">Completed</p>
+              <p className="text-sm font-medium text-slate-500">Delivered</p>
+              <p className="text-2xl font-bold text-slate-900">{formatNumber(stats?.delivered)}</p>
+              <p className="text-xs text-slate-400 mt-1">Completed</p>
             </div>
           </CardBody>
         </Card>
