@@ -7,7 +7,7 @@ interface TableProps {
 
 export const Table: React.FC<TableProps> = ({ children, className = '' }) => {
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200">
+    <div className="overflow-x-auto rounded-lg border border-slate-200 shadow-sm">
       <table className={`w-full border-collapse ${className}`}>{children}</table>
     </div>
   );
@@ -19,7 +19,7 @@ interface TableHeadProps {
 
 export const TableHead: React.FC<TableHeadProps> = ({ children }) => {
   return (
-    <thead className="bg-gray-50 border-b border-gray-200">
+    <thead className="bg-slate-50 border-b border-slate-200">
       {children}
     </thead>
   );
@@ -30,7 +30,7 @@ interface TableBodyProps {
 }
 
 export const TableBody: React.FC<TableBodyProps> = ({ children }) => {
-  return <tbody>{children}</tbody>;
+  return <tbody className="bg-white divide-y divide-slate-100">{children}</tbody>;
 };
 
 interface TableRowProps {
@@ -41,8 +41,8 @@ interface TableRowProps {
 export const TableRow: React.FC<TableRowProps> = ({ children, hoverable = true }) => {
   return (
     <tr
-      className={`border-b border-gray-200 ${
-        hoverable ? 'hover:bg-gray-50 transition-colors' : ''
+      className={`transition-colors ${
+        hoverable ? 'hover:bg-slate-50' : ''
       }`}
     >
       {children}
@@ -69,7 +69,7 @@ export const TableCell: React.FC<TableCellProps> = ({
 
   return (
     <td
-      className={`px-6 py-4 text-sm text-gray-700 ${alignClasses[align]} ${className}`}
+      className={`px-6 py-4 text-sm text-slate-600 ${alignClasses[align]} ${className}`}
     >
       {children}
     </td>
@@ -97,8 +97,8 @@ export const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
 
   return (
     <th
-      className={`px-6 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wide ${alignClasses[align]} ${
-        sortable ? 'cursor-pointer hover:bg-gray-100' : ''
+      className={`px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider ${alignClasses[align]} ${
+        sortable ? 'cursor-pointer hover:bg-slate-100' : ''
       } ${className}`}
     >
       {children}
