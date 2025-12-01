@@ -18,7 +18,7 @@ import {
 } from '../components';
 import { useToast } from '../hooks/useToast';
 import { DocumentArrowDownIcon, DocumentPlusIcon, EyeIcon, PencilIcon } from '@heroicons/react/24/outline';
-import { exportToCSV, exportToJSON, prepareShipmentsForExport } from '../utils/export';
+import { exportToCSV, exportToJSON, exportToExcel, exportToPDF, prepareShipmentsForExport } from '../utils/export';
 import { formatDate } from '../utils/dateFormat';
 
 export const ShipmentsListPage: React.FC = () => {
@@ -74,13 +74,23 @@ export const ShipmentsListPage: React.FC = () => {
     return 'info';
   };
 
-  const handleExport = (format: 'csv' | 'json') => {
+  const handleExport = (format: 'csv' | 'json' | 'excel' | 'pdf') => {
     const exportData = prepareShipmentsForExport(shipments);
+    const filename = `shipments-${new Date().toISOString().split('T')[0]}`;
 
-    if (format === 'csv') {
-      exportToCSV(exportData, 'shipments');
-    } else {
-      exportToJSON(shipments, 'shipments');
+    switch (format) {
+      case 'csv':
+        exportToCSV(exportData, filename);
+        break;
+      case 'json':
+        exportToJSON(shipments, filename);
+        break;
+      case 'excel':
+        exportToExcel(exportData, filename, 'Shipments');
+        break;
+      case 'pdf':
+        exportToPDF(exportData, filename, 'Shipments Report');
+        break;
     }
   };
 
@@ -95,22 +105,33 @@ export const ShipmentsListPage: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Shipments</h1>
           <p className="text-gray-600 mt-2">Manage and track all shipments</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           <Button
             variant="secondary"
             size="sm"
             leftIcon={<DocumentArrowDownIcon className="w-4 h-4" />}
-            onClick={() => handleExport('csv')}
+            onClick={() => handleExport('excel')}
+            title="Export to Excel"
           >
-            CSV
+            Excel
           </Button>
           <Button
             variant="secondary"
             size="sm"
             leftIcon={<DocumentArrowDownIcon className="w-4 h-4" />}
-            onClick={() => handleExport('json')}
+            onClick={() => handleExport('pdf')}
+            title="Export to PDF"
           >
-            JSON
+            PDF
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            leftIcon={<DocumentArrowDownIcon className="w-4 h-4" />}
+            onClick={() => handleExport('csv')}
+            title="Export to CSV"
+          >
+            CSV
           </Button>
           <Button
             leftIcon={<DocumentPlusIcon className="w-4 h-4" />}

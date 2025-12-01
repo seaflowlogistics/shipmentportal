@@ -26,6 +26,7 @@ import {
   DocumentArrowDownIcon
 } from '@heroicons/react/24/outline';
 import { formatDate } from '../utils/dateFormat';
+import { exportToExcel, exportToPDF, prepareShipmentsForExport } from '../utils/export';
 
 export const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -64,6 +65,43 @@ export const AdminDashboard: React.FC = () => {
     return 'info';
   };
 
+  const handleExportDashboard = (format: 'excel' | 'pdf') => {
+    const stats = { ...stats };
+    const exportData = [
+      {
+        'Metric': 'Total Shipments',
+        'Count': stats?.total || 0
+      },
+      {
+        'Metric': 'Pending Approval',
+        'Count': stats?.pending_approval || 0
+      },
+      {
+        'Metric': 'Approved',
+        'Count': stats?.approved || 0
+      },
+      {
+        'Metric': 'Rejected',
+        'Count': stats?.rejected || 0
+      },
+      {
+        'Metric': 'In Transit',
+        'Count': stats?.in_transit || 0
+      },
+      {
+        'Metric': 'Delivered',
+        'Count': stats?.delivered || 0
+      }
+    ];
+
+    const filename = `admin-dashboard-${new Date().toISOString().split('T')[0]}`;
+    if (format === 'excel') {
+      exportToExcel(exportData, filename, 'Dashboard');
+    } else {
+      exportToPDF(exportData, filename, 'Admin Dashboard Report');
+    }
+  };
+
   if (loading) {
     return <Loading fullScreen message="Loading dashboard..." />;
   }
@@ -75,9 +113,27 @@ export const AdminDashboard: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
           <p className="text-gray-600 mt-2">Central management view for all shipments</p>
         </div>
-        <Button leftIcon={<DocumentPlusIcon className="w-4 h-4" />} onClick={() => navigate('/create-shipment')}>
-          Create Shipment
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            leftIcon={<DocumentArrowDownIcon className="w-4 h-4" />}
+            onClick={() => handleExportDashboard('excel')}
+          >
+            Export Excel
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            leftIcon={<DocumentArrowDownIcon className="w-4 h-4" />}
+            onClick={() => handleExportDashboard('pdf')}
+          >
+            Export PDF
+          </Button>
+          <Button leftIcon={<DocumentPlusIcon className="w-4 h-4" />} onClick={() => navigate('/create-shipment')}>
+            Create Shipment
+          </Button>
+        </div>
       </div>
 
       {/* Stats Grid */}
