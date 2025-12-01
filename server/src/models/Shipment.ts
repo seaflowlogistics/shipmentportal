@@ -386,7 +386,7 @@ export class ShipmentModel {
         return parseInt(result.rows[0].count);
     }
 
-    static async getStatistics(userId?: string): Promise<any> {
+    static async getStatistics(userId?: string, dateFrom?: string, dateTo?: string): Promise<any> {
         let query = `
             SELECT
                 COUNT(*) FILTER (WHERE status = 'created') as pending_approval,
@@ -397,19 +397,34 @@ export class ShipmentModel {
                 COUNT(*) FILTER (WHERE status = 'delivered') as delivered,
                 COUNT(*) as total
             FROM shipments
+            WHERE 1=1
         `;
         const values: any[] = [];
+        let paramCount = 1;
 
         if (userId) {
-            query += ' WHERE created_by = $1';
+            query += ` AND created_by = $${paramCount}`;
             values.push(userId);
+            paramCount++;
+        }
+
+        if (dateFrom) {
+            query += ` AND DATE(pickup_date) >= $${paramCount}`;
+            values.push(dateFrom);
+            paramCount++;
+        }
+
+        if (dateTo) {
+            query += ` AND DATE(pickup_date) <= $${paramCount}`;
+            values.push(dateTo);
+            paramCount++;
         }
 
         const result = await pool.query(query, values);
         return result.rows[0];
     }
 
-    static async getRecentShipments(limit: number = 10, userId?: string): Promise<Shipment[]> {
+    static async getRecentShipments(limit: number = 10, userId?: string, dateFrom?: string, dateTo?: string): Promise<Shipment[]> {
         let query = 'SELECT * FROM shipments WHERE 1=1';
         const values: any[] = [];
         let paramCount = 1;
@@ -417,6 +432,18 @@ export class ShipmentModel {
         if (userId) {
             query += ` AND created_by = $${paramCount}`;
             values.push(userId);
+            paramCount++;
+        }
+
+        if (dateFrom) {
+            query += ` AND DATE(pickup_date) >= $${paramCount}`;
+            values.push(dateFrom);
+            paramCount++;
+        }
+
+        if (dateTo) {
+            query += ` AND DATE(pickup_date) <= $${paramCount}`;
+            values.push(dateTo);
             paramCount++;
         }
 

@@ -12,6 +12,7 @@ import {
   ExclamationTriangleIcon,
   ArrowRightIcon,
 } from '@heroicons/react/24/outline';
+import { formatDate } from '../utils/dateFormat';
 import '../styles/dashboard.css';
 
 export const ClearanceManagerDashboard: React.FC = () => {
@@ -34,10 +35,6 @@ export const ClearanceManagerDashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString();
   };
 
   const formatNumber = (num: number) => {

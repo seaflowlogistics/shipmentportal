@@ -19,6 +19,7 @@ import {
 import { useToast } from '../hooks/useToast';
 import { DocumentArrowDownIcon, DocumentPlusIcon, EyeIcon, PencilIcon } from '@heroicons/react/24/outline';
 import { exportToCSV, exportToJSON, prepareShipmentsForExport } from '../utils/export';
+import { formatDate } from '../utils/dateFormat';
 
 export const ShipmentsListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -71,10 +72,6 @@ export const ShipmentsListPage: React.FC = () => {
     if (status === 'in_transit') return 'warning';
     if (status === 'changes_requested') return 'warning';
     return 'info';
-  };
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString();
   };
 
   const handleExport = (format: 'csv' | 'json') => {

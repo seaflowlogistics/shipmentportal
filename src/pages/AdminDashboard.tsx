@@ -25,6 +25,7 @@ import {
   ArrowPathIcon,
   DocumentArrowDownIcon
 } from '@heroicons/react/24/outline';
+import { formatDate } from '../utils/dateFormat';
 
 export const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -49,14 +50,6 @@ export const AdminDashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
   };
 
   const formatNumber = (num: number) => {

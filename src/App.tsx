@@ -45,7 +45,7 @@ function AppContent() {
         <Route
           path="/clearance/dashboard"
           element={
-            <RoleBasedRoute allowedRoles={['clearance_manager']}>
+            <RoleBasedRoute allowedRoles={['clearance_agent']}>
               <ClearanceManagerDashboard />
             </RoleBasedRoute>
           }
@@ -60,7 +60,7 @@ function AppContent() {
         <Route
           path="/create-shipment"
           element={
-            <RoleBasedRoute allowedRoles={['admin', 'clearance_manager']}>
+            <RoleBasedRoute allowedRoles={['admin', 'clearance_agent']}>
               <CreateShipmentPage />
             </RoleBasedRoute>
           }
@@ -71,7 +71,7 @@ function AppContent() {
         <Route
           path="/edit-shipment/:id"
           element={
-            <RoleBasedRoute allowedRoles={['admin', 'clearance_manager', 'accounts']}>
+            <RoleBasedRoute allowedRoles={['admin', 'clearance_agent', 'accounts']}>
               <EditShipmentPage />
             </RoleBasedRoute>
           }
