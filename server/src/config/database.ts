@@ -1,6 +1,8 @@
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
 import fs from 'fs';
+import os from 'os';
+import path from 'path';
 
 dotenv.config();
 
@@ -8,7 +10,15 @@ dotenv.config();
 const sslConfig = process.env.DATABASE_SSL === 'true' ? {
     rejectUnauthorized: true,
     ca: process.env.DATABASE_CA_CERT
-        ? fs.readFileSync(process.env.DATABASE_CA_CERT).toString()
+        ? (() => {
+            try {
+                const certPath = process.env.DATABASE_CA_CERT.replace('~', os.homedir());
+                return fs.readFileSync(certPath).toString();
+            } catch (err) {
+                console.warn('SSL certificate file not found, using default verification');
+                return undefined;
+            }
+          })()
         : undefined,
 } : false;
 

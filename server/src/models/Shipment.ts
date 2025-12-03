@@ -327,10 +327,20 @@ export class ShipmentModel {
         let paramCount = 1;
 
         if (filters?.status) {
-            query += ` AND status = $${paramCount}`;
-            countQuery += ` AND status = $${paramCount}`;
-            values.push(filters.status);
-            paramCount++;
+            // Support multiple status values separated by comma
+            const statuses = filters.status.split(',').map(s => s.trim());
+            if (statuses.length > 1) {
+                const placeholders = statuses.map((_, index) => `$${paramCount + index}`).join(',');
+                query += ` AND status IN (${placeholders})`;
+                countQuery += ` AND status IN (${placeholders})`;
+                values.push(...statuses);
+                paramCount += statuses.length;
+            } else {
+                query += ` AND status = $${paramCount}`;
+                countQuery += ` AND status = $${paramCount}`;
+                values.push(filters.status);
+                paramCount++;
+            }
         }
 
         if (filters?.createdBy) {
@@ -386,7 +396,7 @@ export class ShipmentModel {
         return parseInt(result.rows[0].count);
     }
 
-    static async getStatistics(userId?: string, dateFrom?: string, dateTo?: string): Promise<any> {
+    static async getStatistics(userId?: string, dateFrom?: string, dateTo?: string, statusFilter?: string[]): Promise<any> {
         let query = `
             SELECT
                 COUNT(*) FILTER (WHERE status = 'created') as pending_approval,
@@ -406,6 +416,13 @@ export class ShipmentModel {
             query += ` AND created_by = $${paramCount}`;
             values.push(userId);
             paramCount++;
+        }
+
+        if (statusFilter && statusFilter.length > 0) {
+            const placeholders = statusFilter.map((_, index) => `$${paramCount + index}`).join(',');
+            query += ` AND status IN (${placeholders})`;
+            values.push(...statusFilter);
+            paramCount += statusFilter.length;
         }
 
         if (dateFrom) {

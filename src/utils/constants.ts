@@ -23,11 +23,11 @@ export const ROUTES = {
 export const ROLE_NAMES: Record<UserRole, string> = {
     admin: 'Administrator',
     accounts: 'Accounts Manager',
-    clearance_agent: 'Clearance Agent',
+    clearance_manager: 'Clearance Manager',
 };
 
 export const ROLE_COLORS: Record<UserRole, string> = {
     admin: 'bg-purple-100 text-purple-800',
     accounts: 'bg-blue-100 text-blue-800',
-    clearance_agent: 'bg-green-100 text-green-800',
+    clearance_manager: 'bg-green-100 text-green-800',
 };

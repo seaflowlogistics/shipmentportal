@@ -104,7 +104,7 @@ describe('Role-Based Access Control', () => {
   });
 
   describe('Clearance Agent Permissions', () => {
-    const agent = { role: 'clearance_agent' };
+    const agent = { role: 'clearance_manager' };
 
     it('should allow agent to create shipments', () => {
       expect(canCreateShipment(agent)).toBe(true);
@@ -179,13 +179,13 @@ describe('Role-Based Access Control', () => {
 
   describe('Cross-Role Restrictions', () => {
     it('should prevent clearance agent from viewing other agents shipments', () => {
-      const agent = { id: 'agent-1', role: 'clearance_agent' };
+      const agent = { id: 'agent-1', role: 'clearance_manager' };
       const otherShipment = { created_by: 'agent-2' };
       expect(canAccessShipment(agent, otherShipment)).toBe(false);
     });
 
     it('should allow agent to view own shipments', () => {
-      const agent = { id: 'agent-1', role: 'clearance_agent' };
+      const agent = { id: 'agent-1', role: 'clearance_manager' };
       const ownShipment = { created_by: 'agent-1' };
       expect(canAccessShipment(agent, ownShipment)).toBe(true);
     });
@@ -203,7 +203,7 @@ describe('Role-Based Access Control', () => {
     });
 
     it('should prevent agent from editing after manager rejection', () => {
-      const agent = { id: 'agent-1', role: 'clearance_agent' };
+      const agent = { id: 'agent-1', role: 'clearance_manager' };
       const rejectedShipment = { status: 'rejected', created_by: 'agent-1' };
       expect(canUpdateShipmentWithStatus(agent, rejectedShipment)).toBe(false);
     });
@@ -221,7 +221,7 @@ describe('Role-Based Access Control', () => {
     });
 
     it('should prevent agent from accessing admin dashboard', () => {
-      const agent = { role: 'clearance_agent' };
+      const agent = { role: 'clearance_manager' };
       expect(canAccessAdminDashboard(agent)).toBe(false);
     });
 
@@ -231,12 +231,12 @@ describe('Role-Based Access Control', () => {
     });
 
     it('should prevent agent from accessing approval dashboard', () => {
-      const agent = { role: 'clearance_agent' };
+      const agent = { role: 'clearance_manager' };
       expect(canAccessApprovalDashboard(agent)).toBe(false);
     });
 
     it('should allow agent to see agent dashboard', () => {
-      const agent = { role: 'clearance_agent' };
+      const agent = { role: 'clearance_manager' };
       expect(canAccessAgentDashboard(agent)).toBe(true);
     });
 
@@ -250,11 +250,11 @@ describe('Role-Based Access Control', () => {
 // ============ Helper Functions for Tests ============
 
 function canCreateShipment(user: any): boolean {
-  return ['admin', 'clearance_agent'].includes(user.role);
+  return ['admin', 'clearance_manager'].includes(user.role);
 }
 
 function canReadShipment(user: any): boolean {
-  return ['admin', 'accounts', 'clearance_agent'].includes(user.role);
+  return ['admin', 'accounts', 'clearance_manager'].includes(user.role);
 }
 
 function canUpdateShipment(user: any): boolean {
@@ -290,7 +290,7 @@ function canViewAllShipments(user: any): boolean {
 }
 
 function canExportReports(user: any): boolean {
-  return ['admin', 'accounts', 'clearance_agent'].includes(user.role);
+  return ['admin', 'accounts', 'clearance_manager'].includes(user.role);
 }
 
 function canViewShipmentsForApproval(user: any): boolean {
@@ -298,15 +298,15 @@ function canViewShipmentsForApproval(user: any): boolean {
 }
 
 function canReadOwnShipment(user: any): boolean {
-  return user.role === 'clearance_agent';
+  return user.role === 'clearance_manager';
 }
 
 function canUpdateOwnShipment(user: any): boolean {
-  return user.role === 'clearance_agent';
+  return user.role === 'clearance_manager';
 }
 
 function canUpdateShipmentWithStatus(user: any, shipment: any): boolean {
-  if (user.role !== 'clearance_agent') return false;
+  if (user.role !== 'clearance_manager') return false;
 
   // Can only update new, created, and changes_requested shipments
   const editableStatuses = ['new', 'created', 'changes_requested'];
@@ -315,16 +315,16 @@ function canUpdateShipmentWithStatus(user: any, shipment: any): boolean {
 
 function canAccessShipment(user: any, shipment: any): boolean {
   if (user.role === 'admin' || user.role === 'accounts') return true;
-  if (user.role === 'clearance_agent') return shipment.created_by === user.id;
+  if (user.role === 'clearance_manager') return shipment.created_by === user.id;
   return false;
 }
 
 function canViewOwnShipments(user: any): boolean {
-  return user.role === 'clearance_agent';
+  return user.role === 'clearance_manager';
 }
 
 function canExportOwnShipments(user: any): boolean {
-  return user.role === 'clearance_agent';
+  return user.role === 'clearance_manager';
 }
 
 function canAccessAdminDashboard(user: any): boolean {
@@ -336,5 +336,5 @@ function canAccessApprovalDashboard(user: any): boolean {
 }
 
 function canAccessAgentDashboard(user: any): boolean {
-  return user.role === 'clearance_agent';
+  return user.role === 'clearance_manager';
 }

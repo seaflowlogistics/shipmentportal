@@ -1,0 +1,16 @@
+[build]
+builder = "nixpacks"
+
+[[services]]
+name = "backend"
+rootDirectory = "server"
+buildCommand = "npm run build"
+startCommand = "npm start"
+healthcheckPath = "/health"
+healthcheckTimeout = 10
+
+[[services]]
+name = "frontend"
+rootDirectory = "."
+buildCommand = "npm run build"
+startCommand = "npm run preview"
