@@ -23,10 +23,10 @@ router.get('/', listShipments);
 // Get statistics (all authenticated users)
 router.get('/stats/dashboard', getStatistics);
 
-// Create shipment (ClearanceManager and Admin)
+// Create shipment (ClearanceManager only)
 router.post('/', (req, res, next): void => {
     const user = (req as any).user;
-    if (user.role !== 'clearance_manager' && user.role !== 'admin') {
+    if (user.role !== 'clearance_manager') {
         res.status(403).json({ error: 'Only clearance managers can create shipments' });
         return;
     }

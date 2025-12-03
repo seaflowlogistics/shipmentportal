@@ -281,14 +281,23 @@ export const listShipments = async (req: AuthRequest, res: Response): Promise<vo
     try {
         const { status, mode, search, limit = '10', offset = '0' } = req.query;
         let createdBy = undefined;
+        let roleBasedStatus = status as string | undefined;
 
-        // ClearanceManager and Accounts can only see their own shipments (except Admin)
+        // Apply role-based filtering
         if (req.user!.role === 'clearance_manager') {
+            // ClearanceManager: Only see their own shipments
             createdBy = req.user!.id || req.user!.userId;
+        } else if (req.user!.role === 'accounts') {
+            // Accounts: Only see shipments pending their approval/action
+            // If no status filter provided, default to 'created' or 'changes_requested'
+            if (!status) {
+                roleBasedStatus = 'created,changes_requested';
+            }
         }
+        // Admin: see all shipments (no filtering)
 
         const filters = {
-            status: status as string | undefined,
+            status: roleBasedStatus,
             mode: mode as string | undefined,
             search: search as string | undefined,
             createdBy,
@@ -317,17 +326,24 @@ export const listShipments = async (req: AuthRequest, res: Response): Promise<vo
 export const getStatistics = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         let userId = undefined;
+        let statusFilter = undefined;
         const { dateFrom, dateTo } = req.query;
 
-        // ClearanceAgent gets only their statistics
-        if (req.user!.role === 'clearance_agent') {
+        // Apply role-based statistics filtering
+        if (req.user!.role === 'clearance_manager') {
+            // ClearanceManager: See only their own shipment statistics
             userId = req.user!.id || req.user!.userId;
+        } else if (req.user!.role === 'accounts') {
+            // Accounts: See statistics for pending approval/action shipments only
+            statusFilter = ['created', 'changes_requested'];
         }
+        // Admin: See all statistics (no filtering)
 
         const stats = await ShipmentModel.getStatistics(
             userId,
             dateFrom ? String(dateFrom) : undefined,
-            dateTo ? String(dateTo) : undefined
+            dateTo ? String(dateTo) : undefined,
+            statusFilter
         );
         const recentShipments = await ShipmentModel.getRecentShipments(
             5,

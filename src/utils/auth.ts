@@ -7,7 +7,7 @@ export const getRoleRedirectPath = (role: UserRole): string => {
             return ROUTES.ADMIN_DASHBOARD;
         case 'accounts':
             return ROUTES.ACCOUNTS_DASHBOARD;
-        case 'clearance_agent':
+        case 'clearance_manager':
             return ROUTES.CLEARANCE_DASHBOARD;
         default:
             return ROUTES.LOGIN;
@@ -28,7 +28,7 @@ export const isAccounts = (user: User | null): boolean => {
 };
 
 export const isClearanceManager = (user: User | null): boolean => {
-    return user?.role === 'clearance_agent' || user?.role === 'admin';
+    return user?.role === 'clearance_manager' || user?.role === 'admin';
 };
 
 export const saveAuthData = (accessToken: string, refreshToken: string, user: User): void => {

@@ -44,7 +44,7 @@ export const AdminUsersPage: React.FC = () => {
     username: '',
     email: '',
     full_name: '',
-    role: 'clearance_agent',
+    role: 'clearance_manager',
   });
 
   useEffect(() => {
@@ -88,7 +88,7 @@ export const AdminUsersPage: React.FC = () => {
         username: '',
         email: '',
         full_name: '',
-        role: 'clearance_agent',
+        role: 'clearance_manager',
       });
       fetchUsers();
     } catch (err: any) {
@@ -192,7 +192,7 @@ export const AdminUsersPage: React.FC = () => {
             { value: '', label: 'All Roles' },
             { value: 'admin', label: 'Admin' },
             { value: 'accounts', label: 'Accounts Manager' },
-            { value: 'clearance_agent', label: 'Clearance Agent' },
+            { value: 'clearance_manager', label: 'Clearance Manager' },
           ]}
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value)}
@@ -306,7 +306,7 @@ export const AdminUsersPage: React.FC = () => {
           <Select
             label="Role"
             options={[
-              { value: 'clearance_agent', label: 'Clearance Agent' },
+              { value: 'clearance_manager', label: 'Clearance Manager' },
               { value: 'accounts', label: 'Accounts Manager' },
               { value: 'admin', label: 'Admin' },
             ]}
